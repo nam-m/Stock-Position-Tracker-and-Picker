@@ -43,6 +43,13 @@ public class Portfolio {
      * EFFECTS: get stock position based on stock symbol
      */
     public StockPosition getStockPosition(String symbol) {
-        //stub
+        return this.positions.get(symbol);
+    }
+
+    /**
+     * EFFECTS: get total number of stock positions
+     */
+    public int getTotalStockPositions() {
+        return this.positions.size();
     }
 }
