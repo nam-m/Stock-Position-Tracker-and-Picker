@@ -5,7 +5,7 @@ import java.util.Map;
 // Represents a portfolio that manages buying/selling stocks
 // and adjusting stock positions if needed
 public class Portfolio {
-    private Map<String, StockPosition> stockPositions;
+    private Map<String, StockPosition> stockPositions; // map of stock symbol to StockPosition
 
     /**
      * EFFECTS: construct portfolio for stock position management
@@ -29,6 +29,13 @@ public class Portfolio {
      * EFFECTS: sell stock and reduce from existing position or remove it
      */
     public void sellStock(Stock stock, int quantity) {
+        //stub
+    }
+
+    /**
+     * EFFECTS: get total value of all stock positions
+     */
+    public double getTotalValue() {
         //stub
     }
 }
