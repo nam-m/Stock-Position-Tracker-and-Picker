@@ -20,4 +20,8 @@ public class Stock {
     public double getPrice() {
         return this.price;
     }
+
+    public void setPrice(double newPrice) {
+        this.price = newPrice;
+    }
 }
