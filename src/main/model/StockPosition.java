@@ -18,7 +18,7 @@ public class StockPosition {
      * MODIFIES: this
      * EFFECTS: increase the stock position when buying more shares
      */
-    public void increasePosition(int quantity, double pricePerShare) {
+    private void increasePosition(int quantity, double pricePerShare) {
         //stub
     }
 
@@ -27,7 +27,7 @@ public class StockPosition {
      * MODIFIES: this
      * EFFECTS: decrease the stock position when selling existing shares
      */
-    public void decreasePosition(int quantity) {
+    private void decreasePosition(int quantity) {
         //stub
     }
 
