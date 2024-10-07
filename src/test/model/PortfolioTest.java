@@ -69,4 +69,15 @@ public class PortfolioTest {
         assertEquals(1, portfolio.getStockPosition("AAPL").getQuantity());
         assertEquals(220, portfolio.getStockPosition("AAPL").getAverageCost());
     }
+
+    @Test
+    void testSellNonexistentStock() {
+        portfolio.buyStock(stock2, 1, 220);
+        portfolio.sellStock(stock1, 1);
+
+        assertEquals(1, portfolio.getTotalStockPositions());
+        assertEquals(220, portfolio.getTotalValue());
+        assertEquals(1, portfolio.getStockPosition("AAPL").getQuantity());
+        assertEquals(220, portfolio.getStockPosition("AAPL").getAverageCost());
+    }
 }
