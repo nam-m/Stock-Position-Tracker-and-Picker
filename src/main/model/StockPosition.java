@@ -9,7 +9,7 @@ public class StockPosition {
     /**
      * SPECIFIES: Construct stock position to hold a specific stock and their average cost
      */
-    public StockPosition(Stock stock, double averageCost) {
+    public StockPosition(Stock stock, int quantity, double averageCost) {
         //stub
     }
 
@@ -18,7 +18,7 @@ public class StockPosition {
      * MODIFIES: this
      * EFFECTS: increase the stock position when buying more shares
      */
-    private void increasePosition(int quantity, double pricePerShare) {
+    public void increasePosition(int quantity, double pricePerShare) {
         //stub
     }
 
@@ -27,7 +27,7 @@ public class StockPosition {
      * MODIFIES: this
      * EFFECTS: decrease the stock position when selling existing shares
      */
-    private void decreasePosition(int quantity) {
+    public void decreasePosition(int quantity) {
         //stub
     }
 
@@ -35,7 +35,7 @@ public class StockPosition {
         return this.stock;
     }
 
-    public int getNumberOfShares() {
+    public int getQuantity() {
         return this.quantity;
     }
 
