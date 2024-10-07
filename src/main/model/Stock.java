@@ -2,8 +2,8 @@ package model;
 
 // Represents a stock with its symbol and price (in dollars)
 public class Stock {
-    private String symbol;
-    private double price;
+    private String symbol; // stock symbol
+    private double price;  // current stock price
 
     /**
      * REQUIRES: symbol has non-zero length, price > 0
