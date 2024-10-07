@@ -10,7 +10,8 @@ public class Stock {
      * EFFECTS: Construct a stock with its symbol and price
      */
     public Stock(String symbol, double price) {
-        //stub
+        this.symbol = symbol;
+        this.price = price;
     }
 
     public String getSymbol() {
