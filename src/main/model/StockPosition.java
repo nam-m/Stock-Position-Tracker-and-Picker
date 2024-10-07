@@ -13,6 +13,24 @@ public class StockPosition {
         //stub
     }
 
+    /** 
+     * REQUIRES: quantity > 0, pricePerShare > 0
+     * MODIFIES: this
+     * EFFECTS: increase the stock position when buying more shares
+     */
+    public void increasePosition(int quantity, double pricePerShare) {
+        //stub
+    }
+
+    /** 
+     * REQUIRES: quantity > 0
+     * MODIFIES: this
+     * EFFECTS: decrease the stock position when selling existing shares
+     */
+    public void decreasePosition(int quantity) {
+        //stub
+    }
+
     public Stock getStock() {
         return this.stock;
     }
