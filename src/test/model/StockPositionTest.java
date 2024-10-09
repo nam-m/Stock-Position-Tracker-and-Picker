@@ -1,7 +1,6 @@
 package model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.math.BigDecimal;
 
@@ -9,83 +8,85 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class StockPositionTest {
-    private StockPosition testPosition;
-    private Stock testStock;
+    private StockPosition position;
+    private Stock stock;
 
     @BeforeEach
     void runBefore() {
-        testStock = new Stock("NVDA", 124.92);
-        testPosition = new StockPosition(testStock, 3, 110);
+        stock = new Stock("NVDA", 124.92);
+        position = new StockPosition(stock, 3, 110);
     }
 
     @Test
     void testConstructor() {
-        assertEquals(testStock, testPosition.getStock());
-        assertEquals(3, testPosition.getQuantity());
-        assertEquals(new BigDecimal("110.00"), testPosition.getAverageCost());
+        assertEquals(stock, position.getStock());
+        assertEquals(3, position.getQuantity());
+        assertEquals(new BigDecimal("330.00"), position.getTotalCost());
     }
 
     @Test
     void testIncreasePosition() {
-        testPosition.increasePosition(5, 120);
-        assertEquals(8, testPosition.getQuantity());
-        assertEquals(new BigDecimal("116.25"), testPosition.getAverageCost());
+        position.increasePosition(5, 120);
+        assertEquals(8, position.getQuantity());
+        assertEquals(new BigDecimal("930.00"), position.getTotalCost());
     }
 
     @Test
     void testIncreasePositionMultipleTimes() {
-        testPosition.increasePosition(5, 120);
-        assertEquals(8, testPosition.getQuantity());
-        assertEquals(new BigDecimal("116.25"), testPosition.getAverageCost());
+        position.increasePosition(5, 120);
+        assertEquals(8, position.getQuantity());
+        assertEquals(new BigDecimal("930.00"), position.getTotalCost());
+        assertEquals(new BigDecimal("116.25"), position.getAverageCost());
 
-        testPosition.increasePosition(10, 125);
-        assertEquals(18, testPosition.getQuantity());
-        assertEquals(new BigDecimal("121.11"), testPosition.getAverageCost());
+        position.increasePosition(10, 125);
+        assertEquals(18, position.getQuantity());
+        assertEquals(new BigDecimal("2180.00"), position.getTotalCost());
+        assertEquals(new BigDecimal("121.11"), position.getAverageCost());
     }
 
     @Test
     void testIncreaseNegativeQuantity() {
-        testPosition.increasePosition(-2, 130);
-        assertEquals(3, testPosition.getQuantity());
-        assertEquals(new BigDecimal("110.00"), testPosition.getAverageCost());
+        position.increasePosition(-2, 130);
+        assertEquals(3, position.getQuantity());
+        assertEquals(new BigDecimal("330.00"), position.getTotalCost());
     }
 
     @Test
     void testIncreaseNegativeSharePrice() {
-        testPosition.increasePosition(2, -130);
-        assertEquals(3, testPosition.getQuantity());
-        assertEquals(new BigDecimal("110.00"), testPosition.getAverageCost());
+        position.increasePosition(2, -130);
+        assertEquals(3, position.getQuantity());
+        assertEquals(new BigDecimal("330.00"), position.getTotalCost());
     }
 
     @Test
     void testDecreasePosition() {
-        testPosition.decreasePosition(1);
-        assertEquals(2, testPosition.getQuantity());
-        assertEquals(new BigDecimal("110.00"), testPosition.getAverageCost());
+        position.decreasePosition(1);
+        assertEquals(2, position.getQuantity());
+        assertEquals(new BigDecimal("110.00"), position.getAverageCost());
     }
 
     @Test
     void testDecreasePositionMultipleTimes() {
-        testPosition.decreasePosition(1);
-        assertEquals(2, testPosition.getQuantity());
-        assertEquals(new BigDecimal("110.00"), testPosition.getAverageCost());
+        position.decreasePosition(1);
+        assertEquals(2, position.getQuantity());
+        assertEquals(new BigDecimal("220.00"), position.getTotalCost());
 
-        testPosition.decreasePosition(1);
-        assertEquals(1, testPosition.getQuantity());
-        assertEquals(new BigDecimal("110.00"), testPosition.getAverageCost());
+        position.decreasePosition(1);
+        assertEquals(1, position.getQuantity());
+        assertEquals(new BigDecimal("110.00"), position.getTotalCost());
     }
 
     @Test
     void testDecreaseNegativeQuantity() {
-        testPosition.decreasePosition(-2);
-        assertEquals(3, testPosition.getQuantity());
-        assertEquals(new BigDecimal("110.00"), testPosition.getAverageCost());
+        position.decreasePosition(-2);
+        assertEquals(3, position.getQuantity());
+        assertEquals(new BigDecimal("330.00"), position.getTotalCost());
     }
 
     @Test
     void testDecreaseMoreThanOwnedQuantity() {
-        testPosition.decreasePosition(5);
-        assertEquals(3, testPosition.getQuantity());
-        assertEquals(new BigDecimal("110.00"), testPosition.getAverageCost());
+        position.decreasePosition(5);
+        assertEquals(3, position.getQuantity());
+        assertEquals(new BigDecimal("110.00"), position.getTotalCost());
     }
 }
