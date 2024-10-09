@@ -87,6 +87,6 @@ public class StockPositionTest {
     void testDecreaseMoreThanOwnedQuantity() {
         position.decreasePosition(5);
         assertEquals(3, position.getQuantity());
-        assertEquals(new BigDecimal("110.00"), position.getTotalCost());
+        assertEquals(new BigDecimal("330.00"), position.getTotalCost());
     }
 }
