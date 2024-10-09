@@ -1,6 +1,10 @@
 package model;
 
+import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.Map;
+
+import utils.PriceUtils;
 
 // Represents a portfolio that manages buying/selling stocks
 // and adjusting stock positions if needed
@@ -11,7 +15,7 @@ public class Portfolio {
      * EFFECTS: construct portfolio for stock position management
      */
     public Portfolio() {
-        //stub
+        this.positions = new HashMap<>();
     }
 
     /**
@@ -20,7 +24,15 @@ public class Portfolio {
      * EFFECTS: buy stock and add to existing position or create new one
      */
     public void buyStock(Stock stock, int quantity, double pricePerShare) {
-        //stub
+        pricePerShare = PriceUtils.roundPrice(pricePerShare).doubleValue();
+        StockPosition position = positions.get(stock.getSymbol());
+        // Increase position if there is already one
+        // or create a new one
+        if (position != null) {
+            position.increasePosition(quantity, pricePerShare);
+        } else {
+            positions.put(stock.getSymbol(), new StockPosition(stock, quantity, pricePerShare));
+        }
     }
 
     /**
@@ -29,14 +41,26 @@ public class Portfolio {
      * EFFECTS: sell stock and reduce from existing position or remove it
      */
     public void sellStock(Stock stock, int quantity) {
-        //stub
+        StockPosition position = positions.get(stock.getSymbol());
+        if (position != null) {
+            if (quantity > 0 && quantity < position.getQuantity()) {
+                position.decreasePosition(quantity);
+            } else if (quantity == position.getQuantity()) {
+                positions.remove(stock.getSymbol());
+            }
+        }
     }
 
     /**
      * EFFECTS: get total value of all stock positions
      */
-    public double getTotalValue() {
-        //stub
+    public BigDecimal getTotalValue() {
+        double totalValue = 0;
+        for (StockPosition position : this.positions.values()) {
+            double positionAverageCost = position.getAverageCost().doubleValue();
+            totalValue += position.getQuantity() * positionAverageCost;
+        }
+        return PriceUtils.roundPrice(totalValue);
     }
 
     /**
