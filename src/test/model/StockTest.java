@@ -8,22 +8,22 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class StockTest {
-    private Stock testStock;
+    private Stock stock;
 
     @BeforeEach
     void runBefore() {
-        testStock = new Stock("AAPL", 226.8);
+        stock = new Stock("AAPL", 226.8);
     }
 
     @Test
     void testConstructor() {
-        assertEquals("AAPL", testStock.getSymbol());
-        assertEquals(new BigDecimal("226.80"), testStock.getPrice());
+        assertEquals("AAPL", stock.getSymbol());
+        assertEquals(new BigDecimal("226.80"), stock.getPrice());
     }
 
     @Test
     void testUpdatePrice() {
-        testStock.setPrice(200.5);
-        assertEquals(new BigDecimal("200.50"), testStock.getPrice());
+        stock.setPrice(200.5);
+        assertEquals(new BigDecimal("200.50"), stock.getPrice());
     }
 }
