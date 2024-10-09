@@ -44,6 +44,20 @@ public class StockPositionTest {
     }
 
     @Test
+    void testIncreaseNegativeQuantity() {
+        testPosition.increasePosition(-2, 130);
+        assertEquals(3, testPosition.getQuantity());
+        assertEquals(new BigDecimal("110.00"), testPosition.getAverageCost());
+    }
+
+    @Test
+    void testIncreaseNegativeSharePrice() {
+        testPosition.increasePosition(2, -130);
+        assertEquals(3, testPosition.getQuantity());
+        assertEquals(new BigDecimal("110.00"), testPosition.getAverageCost());
+    }
+
+    @Test
     void testDecreasePosition() {
         testPosition.decreasePosition(1);
         assertEquals(2, testPosition.getQuantity());
@@ -62,10 +76,16 @@ public class StockPositionTest {
     }
 
     @Test
-    void testDecreasePositionToZero() {
-        testPosition.decreasePosition(3);
-        // There is no stock position if stock quantity is reduced to 0
-        assertNull(testPosition);
+    void testDecreaseNegativeQuantity() {
+        testPosition.decreasePosition(-2);
+        assertEquals(3, testPosition.getQuantity());
+        assertEquals(new BigDecimal("110.00"), testPosition.getAverageCost());
     }
 
+    @Test
+    void testDecreaseMoreThanOwnedQuantity() {
+        testPosition.decreasePosition(5);
+        assertEquals(3, testPosition.getQuantity());
+        assertEquals(new BigDecimal("110.00"), testPosition.getAverageCost());
+    }
 }

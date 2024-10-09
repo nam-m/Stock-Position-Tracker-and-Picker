@@ -25,14 +25,16 @@ public class StockPosition {
      * EFFECTS: increase the stock position when buying more shares
      */
     public void increasePosition(int quantity, double pricePerShare) {
-        double increasedCost = quantity * pricePerShare;
-        double totalCost = this.quantity * this.averageCost.doubleValue() + increasedCost;
-        this.quantity += quantity;
-        this.averageCost = PriceUtils.roundPrice(totalCost / this.quantity);
+        if (quantity > 0 && pricePerShare > 0) {
+            double increasedCost = quantity * pricePerShare;
+            double totalCost = this.quantity * this.averageCost.doubleValue() + increasedCost;
+            this.quantity += quantity;
+            this.averageCost = PriceUtils.roundPrice(totalCost / this.quantity);
+        }
     }
 
     /** 
-     * REQUIRES: quantity > 0
+     * REQUIRES: 0 < quantity <= this.quantity
      * MODIFIES: this
      * EFFECTS: decrease the stock position when selling existing shares
      */
@@ -41,7 +43,9 @@ public class StockPosition {
             if (quantity > this.quantity) {
                 System.out.println("Cannot sell more than owned quantity");
             }
-            this.quantity -= quantity;
+            else {
+                this.quantity -= quantity;
+            }
         }
     }
 
