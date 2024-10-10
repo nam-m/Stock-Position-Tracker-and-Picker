@@ -25,8 +25,4 @@ public class Stock {
     public BigDecimal getPrice() {
         return this.price;
     }
-
-    public void setPrice(double newPrice) {
-        this.price = PriceUtils.roundPrice(newPrice);
-    }
 }

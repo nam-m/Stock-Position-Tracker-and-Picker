@@ -20,10 +20,4 @@ public class StockTest {
         assertEquals("AAPL", stock.getSymbol());
         assertEquals(new BigDecimal("226.80"), stock.getPrice());
     }
-
-    @Test
-    void testUpdatePrice() {
-        stock.setPrice(200.5);
-        assertEquals(new BigDecimal("200.50"), stock.getPrice());
-    }
 }
