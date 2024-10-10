@@ -23,15 +23,14 @@ public class Portfolio {
      * MODIFIES: this
      * EFFECTS: buy stock and add to existing position or create new one
      */
-    public void buyStock(Stock stock, int quantity, double pricePerShare) {
-        pricePerShare = PriceUtils.roundPrice(pricePerShare).doubleValue();
+    public void buyStock(Stock stock, int quantity) {
         StockPosition position = positions.get(stock.getSymbol());
         // Increase position if there is already one
         // or create a new one
         if (position != null) {
-            position.increasePosition(quantity, pricePerShare);
+            position.increasePosition(quantity);
         } else {
-            positions.put(stock.getSymbol(), new StockPosition(stock, quantity, pricePerShare));
+            positions.put(stock.getSymbol(), new StockPosition(stock, quantity));
         }
     }
 
@@ -57,8 +56,7 @@ public class Portfolio {
     public BigDecimal getTotalValue() {
         double totalValue = 0;
         for (StockPosition position : this.positions.values()) {
-            double positionAverageCost = position.getAverageCost().doubleValue();
-            totalValue += position.getQuantity() * positionAverageCost;
+            totalValue += position.getTotalCost().doubleValue();
         }
         return PriceUtils.roundPrice(totalValue);
     }

@@ -23,62 +23,67 @@ public class PortfolioTest {
     @Test
     void testConstructor() {
         assertEquals(new BigDecimal("0.00"), portfolio.getTotalValue());
+        assertEquals(0, portfolio.getTotalStockPositions());
     }
 
     @Test
     void testGetTotalValue() {
-        portfolio.buyStock(stock1, 4, 120);
+        portfolio.buyStock(stock1, 4);
         assertEquals(new BigDecimal("480.00"), portfolio.getTotalValue());
     }
 
     @Test
     void testBuyStockNewPosition() {
-        portfolio.buyStock(stock1, 4, 120);
+        portfolio.buyStock(stock1, 4);
         assertEquals(4, portfolio.getStockPosition("NVDA").getQuantity());
         assertEquals(new BigDecimal("120.00"), portfolio.getStockPosition("NVDA").getAverageCost());
     }
 
     @Test
     void testBuyStockExistingPosition() {
-        portfolio.buyStock(stock1, 4, 120);
-        portfolio.buyStock(stock1, 6, 150);
+        portfolio.buyStock(stock1, 4);
+        portfolio.buyStock(stock1, 6);
         assertEquals(10, portfolio.getStockPosition("NVDA").getQuantity());
-        assertEquals(new BigDecimal("138.00"), portfolio.getStockPosition("NVDA").getAverageCost());
+        assertEquals(new BigDecimal("1200.00"), portfolio.getTotalValue());
     }
 
     @Test
     void testBuyDifferentStocks() {
-        portfolio.buyStock(stock1, 4, 120);
-        portfolio.buyStock(stock2, 3, 220);
+        portfolio.buyStock(stock1, 4);
+        portfolio.buyStock(stock2, 3);
 
         assertEquals(4, portfolio.getStockPosition("NVDA").getQuantity());
         assertEquals(new BigDecimal("120.00"), portfolio.getStockPosition("NVDA").getAverageCost());
         
         assertEquals(3, portfolio.getStockPosition("AAPL").getQuantity());
-        assertEquals(new BigDecimal("220.00"), portfolio.getStockPosition("AAPL").getAverageCost());
+        assertEquals(new BigDecimal("225.00"), portfolio.getStockPosition("AAPL").getAverageCost());
+
+        assertEquals(new BigDecimal("1155.00"), portfolio.getTotalValue());
     }
 
     @Test
     void testSellStock() {
-        portfolio.buyStock(stock1, 4, 120);
+        portfolio.buyStock(stock1, 4);
         portfolio.sellStock(stock1, 3);
 
         assertEquals(1, portfolio.getStockPosition("NVDA").getQuantity());
         assertEquals(new BigDecimal("120.00"), portfolio.getStockPosition("NVDA").getAverageCost());
+        assertEquals(new BigDecimal("120.00"), portfolio.getTotalValue());
     }
 
     @Test
     void testSellDifferentStocks() {
-        portfolio.buyStock(stock1, 4, 120);
-        portfolio.buyStock(stock2, 3, 220);
-        portfolio.sellStock(stock1, 2);
+        portfolio.buyStock(stock1, 4);
+        portfolio.buyStock(stock2, 3);
+        portfolio.sellStock(stock1, 1);
         portfolio.sellStock(stock2, 2);
 
-        assertEquals(2, portfolio.getStockPosition("NVDA").getQuantity());
+        assertEquals(3, portfolio.getStockPosition("NVDA").getQuantity());
         assertEquals(new BigDecimal("120.00"), portfolio.getStockPosition("NVDA").getAverageCost());
 
         assertEquals(1, portfolio.getStockPosition("AAPL").getQuantity());
-        assertEquals(new BigDecimal("220.00"), portfolio.getStockPosition("AAPL").getAverageCost());
+        assertEquals(new BigDecimal("225.00"), portfolio.getStockPosition("AAPL").getAverageCost());
+        assertEquals(new BigDecimal("585.00"), portfolio.getTotalValue());
     }
 
     @Test
@@ -91,25 +96,25 @@ public class PortfolioTest {
 
     @Test
     void testSellMoreThanOwnedStock() {
-        portfolio.buyStock(stock1, 4, 120);
+        portfolio.buyStock(stock1, 4);
         portfolio.sellStock(stock1, 5);
 
         assertEquals(4, portfolio.getStockPosition("NVDA").getQuantity());
-        assertEquals(new BigDecimal("120.00"), portfolio.getStockPosition("NVDA").getAverageCost());
+        assertEquals(new BigDecimal("480.00"), portfolio.getTotalValue());
     }
 
     @Test
     void testSellNegativeStock() {
-        portfolio.buyStock(stock1, 4, 120);
+        portfolio.buyStock(stock1, 4);
         portfolio.sellStock(stock1, -5);
 
         assertEquals(4, portfolio.getStockPosition("NVDA").getQuantity());
-        assertEquals(new BigDecimal("120.00"), portfolio.getStockPosition("NVDA").getAverageCost());
+        assertEquals(new BigDecimal("480.00"), portfolio.getTotalValue());
     }
 
     @Test
     void testSellAllStockPosition() {
-        portfolio.buyStock(stock1, 4, 120);
+        portfolio.buyStock(stock1, 4);
         portfolio.sellStock(stock1, 4);
 
         assertNull(portfolio.getStockPosition("NVDA"));

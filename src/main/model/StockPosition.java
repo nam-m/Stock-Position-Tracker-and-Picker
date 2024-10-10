@@ -16,7 +16,7 @@ public class StockPosition {
     public StockPosition(Stock stock, int quantity) {
         this.stock = stock;
         this.quantity = quantity;
-        this.totalCost = stock.getPrice().multiply(BigDecimal.valueOf(quantity));
+        this.totalCost = PriceUtils.roundPrice(stock.getPrice().doubleValue() * quantity);
     }
 
     /** 
