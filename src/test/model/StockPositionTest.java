@@ -13,8 +13,8 @@ public class StockPositionTest {
 
     @BeforeEach
     void runBefore() {
-        stock = new Stock("NVDA", 124.92);
-        position = new StockPosition(stock, 3, 110);
+        stock = new Stock("NVDA", 110);
+        position = new StockPosition(stock, 3);
     }
 
     @Test
@@ -22,40 +22,28 @@ public class StockPositionTest {
         assertEquals(stock, position.getStock());
         assertEquals(3, position.getQuantity());
         assertEquals(new BigDecimal("330.00"), position.getTotalCost());
+        assertEquals(new BigDecimal("110.00"), position.getAverageCost());
     }
 
     @Test
     void testIncreasePosition() {
-        position.increasePosition(5, 120);
+        position.increasePosition(5);
         assertEquals(8, position.getQuantity());
-        assertEquals(new BigDecimal("930.00"), position.getTotalCost());
+        assertEquals(new BigDecimal("880.00"), position.getTotalCost());
+        assertEquals(new BigDecimal("110.00"), position.getAverageCost());
     }
 
     @Test
     void testIncreasePositionMultipleTimes() {
-        position.increasePosition(5, 120);
+        position.increasePosition(5);
         assertEquals(8, position.getQuantity());
-        assertEquals(new BigDecimal("930.00"), position.getTotalCost());
-        assertEquals(new BigDecimal("116.25"), position.getAverageCost());
+        assertEquals(new BigDecimal("880.00"), position.getTotalCost());
+        assertEquals(new BigDecimal("110.00"), position.getAverageCost());
 
-        position.increasePosition(10, 125);
+        position.increasePosition(10);
         assertEquals(18, position.getQuantity());
-        assertEquals(new BigDecimal("2180.00"), position.getTotalCost());
-        assertEquals(new BigDecimal("121.11"), position.getAverageCost());
-    }
-
-    @Test
-    void testIncreaseNegativeQuantity() {
-        position.increasePosition(-2, 130);
-        assertEquals(3, position.getQuantity());
-        assertEquals(new BigDecimal("330.00"), position.getTotalCost());
-    }
-
-    @Test
-    void testIncreaseNegativeSharePrice() {
-        position.increasePosition(2, -130);
-        assertEquals(3, position.getQuantity());
-        assertEquals(new BigDecimal("330.00"), position.getTotalCost());
+        assertEquals(new BigDecimal("1980.00"), position.getTotalCost());
+        assertEquals(new BigDecimal("110.00"), position.getAverageCost());
     }
 
     @Test
@@ -70,10 +58,12 @@ public class StockPositionTest {
         position.decreasePosition(1);
         assertEquals(2, position.getQuantity());
         assertEquals(new BigDecimal("220.00"), position.getTotalCost());
+        assertEquals(new BigDecimal("110.00"), position.getAverageCost());
 
         position.decreasePosition(1);
         assertEquals(1, position.getQuantity());
         assertEquals(new BigDecimal("110.00"), position.getTotalCost());
+        assertEquals(new BigDecimal("110.00"), position.getAverageCost());
     }
 
     @Test
@@ -81,6 +71,15 @@ public class StockPositionTest {
         position.decreasePosition(-2);
         assertEquals(3, position.getQuantity());
         assertEquals(new BigDecimal("330.00"), position.getTotalCost());
+        assertEquals(new BigDecimal("110.00"), position.getAverageCost());
+    }
+
+    @Test
+    void testDecreaseEqualToOwnedQuantity() {
+        position.decreasePosition(3);
+        assertEquals(0, position.getQuantity());
+        assertEquals(new BigDecimal("0.00"), position.getTotalCost());
+        assertEquals(new BigDecimal("0.00"), position.getAverageCost());
     }
 
     @Test
@@ -88,5 +87,6 @@ public class StockPositionTest {
         position.decreasePosition(5);
         assertEquals(3, position.getQuantity());
         assertEquals(new BigDecimal("330.00"), position.getTotalCost());
+        assertEquals(new BigDecimal("110.00"), position.getAverageCost());
     }
 }
