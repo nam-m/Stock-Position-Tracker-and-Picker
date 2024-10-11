@@ -26,8 +26,8 @@ public class StockPosition {
      * EFFECTS: increase the stock position when buying more shares
      */
     public void increasePosition(int quantity) {
-        BigDecimal addedCost = stock.getPrice().multiply(BigDecimal.valueOf(quantity));
-        this.totalCost = this.totalCost.add(addedCost);
+        double addedCost = stock.getPrice().doubleValue() * quantity;
+        this.totalCost = PriceUtils.roundPrice(this.totalCost.doubleValue() + addedCost);
         this.quantity += quantity;
     }
 
@@ -38,8 +38,8 @@ public class StockPosition {
      */
     public void decreasePosition(int quantity) {
         if (quantity > 0 && quantity <= this.quantity) {
-            BigDecimal decreasedValue = stock.getPrice().multiply(BigDecimal.valueOf(quantity));
-            this.totalCost = this.totalCost.subtract(decreasedValue);
+            double decreasedValue = stock.getPrice().doubleValue() * quantity;
+            this.totalCost = PriceUtils.roundPrice(this.totalCost.doubleValue() - decreasedValue);
             this.quantity -= quantity;
         }
     }

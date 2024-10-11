@@ -34,10 +34,10 @@ public class Account {
      */
     public void buyStock(String stockSymbol, int quantity) {
         Stock stock = StockRepository.getStockBySymbol(stockSymbol);
-        BigDecimal totalCost = stock.getPrice().multiply(BigDecimal.valueOf(quantity));
-        if (totalCost.doubleValue() <= this.cashBalance.doubleValue()) {
+        double totalCost = stock.getPrice().doubleValue() * quantity;
+        if (totalCost <= this.cashBalance.doubleValue()) {
             this.portfolio.buyStock(stock, quantity);
-            this.cashBalance = this.cashBalance.subtract(totalCost);
+            this.cashBalance = PriceUtils.roundPrice(this.cashBalance.doubleValue() - totalCost);
         }
     }
 
@@ -50,8 +50,8 @@ public class Account {
         Stock stock = StockRepository.getStockBySymbol(stockSymbol);
         if (quantity > 0 && quantity <= this.portfolio.getStockPosition(stock.getSymbol()).getQuantity()) {
             this.portfolio.sellStock(stock, quantity);
-            BigDecimal sellValue = stock.getPrice().multiply(BigDecimal.valueOf(quantity));
-            this.cashBalance = this.cashBalance.add(sellValue);
+            double sellValue = stock.getPrice().doubleValue() * quantity;
+            this.cashBalance = PriceUtils.roundPrice(this.cashBalance.doubleValue() + sellValue);
         }
     }
 
@@ -61,7 +61,8 @@ public class Account {
      * SPECIFIES: increase cash balance by depositValue
      */
     public void deposit(double depositValue) {
-        this.cashBalance = this.cashBalance.add(BigDecimal.valueOf(depositValue));
+        double newBalance = this.cashBalance.doubleValue() + depositValue;
+        this.cashBalance = PriceUtils.roundPrice(newBalance);
     }
 
     /**
@@ -70,7 +71,8 @@ public class Account {
      * SPECIFIES: decrease cash balance by withdrawValue
      */
     public void withdraw(double withdrawValue) {
-        this.cashBalance = this.cashBalance.subtract(BigDecimal.valueOf(withdrawValue));
+        double newBalance = this.cashBalance.doubleValue() - withdrawValue;
+        this.cashBalance = PriceUtils.roundPrice(newBalance);
     }
 
     public String getAccountId() {
