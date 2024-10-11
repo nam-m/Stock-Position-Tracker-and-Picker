@@ -87,4 +87,16 @@ public class AccountTest {
         assertEquals(4, account.getPortfolio().getStockPosition("AAPL").getQuantity());
         assertEquals(new BigDecimal("9120.00"), account.getCashBalance());
     }
+
+    @Test
+    void testDeposit() {
+        account.deposit(5000);
+        assertEquals(new BigDecimal("15000.00"), account.getCashBalance());
+    }
+
+    @Test
+    void testWithdraw() {
+        account.withdraw(5000);
+        assertEquals(new BigDecimal("5000.00"), account.getCashBalance());
+    }
 }
