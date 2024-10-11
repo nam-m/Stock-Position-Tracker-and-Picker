@@ -53,11 +53,15 @@ public class StockApp {
         account = new Account("Henry", 10000);
         input = new Scanner(System.in);
         input.useDelimiter("\r?\n|\r");
+        System.out.println("Welcome to the Stock Tracker App!");
     }
 
-    // EFFECTS: displays menu of options to user
+    /**
+     * EFFECTS: displays menu of options to user
+    */
     private void displayMenu() {
         System.out.println("\nSelect from:");
+        System.out.println("\tm -> manage account");
         System.out.println("\tb -> buy stock");
         System.out.println("\ts -> sell stock");
         System.out.println("\tv -> view portfolio");
@@ -69,17 +73,76 @@ public class StockApp {
      * EFFECTS: processes user command
     */
     private void processCommand(String command) {
-        if (command.equals("b")) {
-            doBuyStock();
-        } else if (command.equals("s")) {
-            doSellStock();
-        } else if (command.equals("v")) {
-            showPortfolio();
-        } else {
-            System.out.println("Selection not valid...");
+        switch (command) {
+            case "m":
+                accountMenu();
+                break;
+            case "b":
+                doBuyStock();
+                break;
+            case "s":
+                doSellStock();
+                break;
+            case "v":
+                showPortfolio();
+                break;
+            default:
+                System.out.println("Selection not valid...");
+                break;
+        }
+    }
+
+    /** 
+     * EFFECTS: displays the account management menu
+    */ 
+    private void accountMenu() {
+        boolean manageAccount = true;
+        String accountCommand;
+
+        while (manageAccount) {
+            displayAccountMenu();
+            accountCommand = input.nextLine().toLowerCase();
+
+            if (accountCommand.equals("q")) {
+                manageAccount = false;
+            } else {
+                processAccountCommand(accountCommand);
+            }
         }
     }
     
+    /**
+     * MODIFIES: this
+     * EFFECTS: processes user command for managing account
+     */
+    private void processAccountCommand(String command) {
+        switch (command) {
+            case "d":
+                doDeposit();
+                break;
+            case "w":
+                doWithdraw();
+                break;
+            case "b":
+                showCashBalance();
+                break;
+            default:
+                System.out.println("Selection not valid...");
+                break;
+        }
+    }
+
+    /**
+     * EFFECTS: displays menu of account options to user
+    */
+    private void displayAccountMenu() {
+        System.out.println("\nManage Account:");
+        System.out.println("\td -> deposit");
+        System.out.println("\tw -> withdraw");
+        System.out.println("\tb -> view balance");
+        System.out.println("\tq -> exit to main menu");
+    }
+
     /**
      * MODIFIES: this
      * EFFECTS: buy stock
@@ -131,17 +194,55 @@ public class StockApp {
                 System.out.println("Cannot sell negative quantity\n");
             } else {
                 StockPosition updatedPosition = account.getPortfolio().getStockPosition(symbol);
-                if (quantity > updatedPosition.getQuantity()) {
-                    System.out.println("Cannot sell more than " + updatedPosition.getQuantity() + " shares\n");
+                if (updatedPosition == null) {
+                    System.out.println("Not found stock position for " + symbol);
                 } else {
-                    account.sellStock(symbol, quantity);
-                    System.out.println("Sold " + quantity + " shares of " + symbol + "\n");
-                    // Retrieve the updated stock position from portfolio
-                    showStockPosition(updatedPosition);
-                } 
+                    if (quantity > updatedPosition.getQuantity()) {
+                        System.out.println("Cannot sell more than " + updatedPosition.getQuantity() + " shares\n");
+                    } else {
+                        account.sellStock(symbol, quantity);
+                        System.out.println("Sold " + quantity + " shares of " + symbol + "\n");
+                        // Retrieve the updated stock position from portfolio
+                        showStockPosition(updatedPosition);
+                    } 
+                }
             }
         }
         showCashBalance();
+    }
+
+    /**
+     * SPECIFIES: deposit into cash balance
+     */
+    private void doDeposit() {
+        System.out.println("Enter amount to deposit:");
+        String deposit = input.nextLine();
+        double depositValue = Double.parseDouble(deposit);
+        if (depositValue <= 0) {
+            System.out.println("Cannot deposit negative or zero amount");
+        } else {
+            account.deposit(depositValue);
+            System.out.println("Deposited $" + depositValue + " to account.");
+        }
+        
+    }
+
+    /**
+     * SPECIFIES: withdraw from cash balance
+     */
+    private void doWithdraw() {
+        System.out.println("Enter amount to withdraw:");
+        String withdrawInput = input.nextLine();
+        double withdrawValue = Double.parseDouble(withdrawInput);
+        if (withdrawValue <= 0) {
+            System.out.println("Cannot withdraw negative or zero amount");
+        } else if(withdrawValue > this.account.getCashBalance().doubleValue()) {
+            System.out.println("Cannot withdraw more than cash balance");
+        } 
+        else {
+            account.withdraw(withdrawValue);
+            System.out.println("Withdrew $" + withdrawValue + " from account.");
+        }
     }
 
     /**
@@ -162,7 +263,7 @@ public class StockApp {
      * SPECIFIES: print cash balance
      */
     private void showCashBalance() {
-        System.out.println("Remaining cash balance: $" + account.getCashBalance());
+        System.out.println("Cash balance: $" + account.getCashBalance());
     }
     
     /**
