@@ -2,8 +2,10 @@ package model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
+import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -120,5 +122,26 @@ public class PortfolioTest {
         assertNull(portfolio.getStockPosition("NVDA"));
         assertEquals(0, portfolio.getTotalStockPositions());
         assertEquals(new BigDecimal("0.00"), portfolio.getTotalValue());
+    }
+
+    @Test
+    void testGetAllStockPositionsEmpty() {
+        // Test when there are no stock positions
+        Map<String, StockPosition> stockPositions = portfolio.getAllStockPositions();
+        assertTrue(stockPositions.isEmpty(), "Stock positions should be empty initially");
+    }
+
+    @Test
+    void testGetAllStockPositionsWithStocks() {
+
+        portfolio.buyStock(stock1, 4);;
+        portfolio.buyStock(stock2, 4);
+
+        // Retrieve the stock positions and verify
+        Map<String, StockPosition> stockPositions = portfolio.getAllStockPositions();
+
+        assertEquals(2, stockPositions.size());
+        assertTrue(stockPositions.containsKey(stock1.getSymbol()));
+        assertTrue(stockPositions.containsKey(stock2.getSymbol()));
     }
 }
