@@ -1,8 +1,10 @@
-package model;
+package ui;
 
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.exceptions.CsvValidationException;
+
+import model.Stock;
 
 import java.io.FileReader;
 import java.io.IOException;

@@ -1,10 +1,12 @@
-package model;
+package ui;
 
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import com.opencsv.exceptions.CsvValidationException;
+
+import model.Stock;
 
 import java.io.IOException;
 import java.math.BigDecimal;

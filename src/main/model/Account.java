@@ -3,6 +3,7 @@ package model;
 import java.math.BigDecimal;
 import java.util.UUID;
 
+import ui.StockRepository;
 import utils.PriceUtils;
 
 /** 
