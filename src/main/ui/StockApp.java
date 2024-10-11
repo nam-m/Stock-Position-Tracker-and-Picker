@@ -55,7 +55,7 @@ public class StockApp {
         System.out.println("\nSelect from:");
         System.out.println("\tb -> buy stock");
         System.out.println("\ts -> sell stock");
-        System.out.println("\tp -> view portfolio");
+        System.out.println("\tv -> view portfolio");
         System.out.println("\tq -> quit");
     }
 
@@ -66,7 +66,9 @@ public class StockApp {
             doBuyStock();
         } else if (command.equals("s")) {
             doSellStock();
-        } else {
+        } else if (command.equals("v")) {
+            showPortfolio();
+        }else {
             System.out.println("Selection not valid...");
         }
     }
@@ -138,7 +140,7 @@ public class StockApp {
             System.out.println("Average Cost: $" + stockPosition.getAverageCost());
             System.out.println("Total Cost: $" + stockPosition.getTotalCost());
         } else {
-            System.out.println("No update to stock position due to invalid transaction");
+            System.out.println("No update to stock position due to invalid transaction\n");
         }
     }
 
@@ -146,4 +148,21 @@ public class StockApp {
         System.out.println("Remaining cash balance: $" + account.getCashBalance());
     }
     
+    private void showPortfolio() {
+        if (account.getPortfolio().getTotalStockPositions() == 0) {
+            System.out.println("No owned stock positions");
+        } else {
+            System.out.println("Owned stock positions:");
+            for (StockPosition position : account.getPortfolio().getAllStockPositions().values()) {
+                String symbol = position.getStock().getSymbol();
+                int quantity = position.getQuantity();
+                BigDecimal totalCost= position.getTotalCost();
+                BigDecimal averageCost = position.getAverageCost();
+
+                System.out.println(symbol + " - " + quantity + " shares");
+                System.out.println("  Total Value: $" + totalCost);
+                System.out.println("  Average Cost: $" + averageCost);
+            }
+        }
+    }
 }
