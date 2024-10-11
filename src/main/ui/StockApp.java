@@ -16,7 +16,7 @@ public class StockApp {
     /**
      * EFFECTS: runs the stock picker application
     */
-     public StockApp() {
+    public StockApp() {
         runStockApp();
     }
 
@@ -150,17 +150,15 @@ public class StockApp {
     private void doBuyStock() {
         System.out.println("Enter stock symbol:");
         String symbol = input.nextLine().trim().toUpperCase();
-        Stock stock = StockRepository.getStockBySymbol(symbol);
-        
-        if (stock == null) {
-            System.out.println("Invalid stock symbol. Please try again");
-        } else {
+
+        if (isValidStock(symbol)) {
             System.out.println("Enter quantity:");
             int quantity = Integer.parseInt(input.nextLine().trim());
 
             if (quantity <= 0) {
                 System.out.println("Cannot buy negative quantity\n");
             } else {
+                Stock stock = StockRepository.getStockBySymbol(symbol);
                 BigDecimal totalCost = stock.getPrice().multiply(BigDecimal.valueOf(quantity));
                 if (totalCost.compareTo(account.getCashBalance()) > 0) {
                     System.out.println("Cannot buy stock with total value of $" + totalCost + "\n");
@@ -182,14 +180,10 @@ public class StockApp {
     private void doSellStock() {
         System.out.println("Enter stock symbol:");
         String symbol = input.nextLine().trim().toUpperCase();
-        Stock stock = StockRepository.getStockBySymbol(symbol);
         
-        if (stock == null) {
-            System.out.println("Invalid stock symbol. Please try again");
-        } else {
+        if (isValidStock(symbol)) {
             System.out.println("Enter quantity:");
             int quantity = Integer.parseInt(input.nextLine().trim());
-
             if (quantity <= 0) {
                 System.out.println("Cannot sell negative quantity\n");
             } else {
@@ -236,10 +230,9 @@ public class StockApp {
         double withdrawValue = Double.parseDouble(withdrawInput);
         if (withdrawValue <= 0) {
             System.out.println("Cannot withdraw negative or zero amount");
-        } else if(withdrawValue > this.account.getCashBalance().doubleValue()) {
+        } else if (withdrawValue > this.account.getCashBalance().doubleValue()) {
             System.out.println("Cannot withdraw more than cash balance");
-        } 
-        else {
+        } else {
             account.withdraw(withdrawValue);
             System.out.println("Withdrew $" + withdrawValue + " from account.");
         }
@@ -285,5 +278,17 @@ public class StockApp {
                 System.out.println("  Average Cost: $" + averageCost);
             }
         }
+    }
+    
+    /**
+     * SPECIFIES: check if stock symbol is in stock repository
+     */
+    private boolean isValidStock(String symbol) {
+        Stock stock = StockRepository.getStockBySymbol(symbol);
+        if (stock == null) {
+            System.out.println("Invalid stock symbol. Please try again");
+            return false;
+        }
+        return true;
     }
 }
