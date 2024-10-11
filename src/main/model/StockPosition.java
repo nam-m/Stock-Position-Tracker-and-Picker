@@ -6,11 +6,12 @@ import utils.PriceUtils;
 
 // Represents a stock position with a stock and the average cost of its shares
 public class StockPosition {
-    private Stock stock;        // reference to stock object, that has symbol and price
-    private int quantity;       // total quantity of shares for this stock
-    private BigDecimal totalCost; // total cost of all shares for this stock
+    private Stock stock;            // reference to stock object, that has symbol and price
+    private int quantity;           // total quantity of shares for this stock
+    private BigDecimal totalCost;   // total cost of all shares for this stock
 
     /**
+     * REQUIRES: quantity > 0
      * SPECIFIES: Construct stock position to hold a specific stock and their average cost
      */
     public StockPosition(Stock stock, int quantity) {
@@ -55,6 +56,9 @@ public class StockPosition {
         return this.totalCost;
     }
 
+    /**
+     * SPECIFIES: return average cost of the stock position
+     */
     public BigDecimal getAverageCost() {
         if (this.quantity > 0) {
             double averageCost = this.totalCost.doubleValue() / this.quantity;

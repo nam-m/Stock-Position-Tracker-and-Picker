@@ -7,20 +7,23 @@ import model.Account;
 import model.Stock;
 import model.StockPosition;
 
-// Stock picker application
+// Represents stock picker application
 // Reference: https://github.students.cs.ubc.ca/CPSC210/TellerApp/blob/main/src/main/ca/ubc/cpsc210/bank/ui/TellerApp.java
 public class StockApp {
-    // Initialize account
-    private Account account;
-    private Scanner input;
+    private Account account; // stock app account
+    private Scanner input;   // console input
 
-    // EFFECTS: runs the stock picker application
-    public StockApp() {
+    /**
+     * EFFECTS: runs the stock picker application
+    */
+     public StockApp() {
         runStockApp();
     }
 
-    // MODIFIES: this
-    // EFFECTS: processes user input
+    /**
+     * MODIFIES: this
+     * EFFECTS: processes user input
+     */
     private void runStockApp() {
         boolean keepGoing = true;
         String command = null;
@@ -42,8 +45,10 @@ public class StockApp {
         System.out.println("\nGoodbye!");
     }
 
-    // MODIFIES: this
-    // EFFECTS: initializes accounts
+    /**
+     * MODIFIES: this
+     * EFFECTS: initializes accounts
+     */
     private void init() {
         account = new Account("Henry", 10000);
         input = new Scanner(System.in);
@@ -59,8 +64,10 @@ public class StockApp {
         System.out.println("\tq -> quit");
     }
 
-    // MODIFIES: this
-    // EFFECTS: processes user command
+    /** 
+     * MODIFIES: this
+     * EFFECTS: processes user command
+    */
     private void processCommand(String command) {
         if (command.equals("b")) {
             doBuyStock();
@@ -68,13 +75,15 @@ public class StockApp {
             doSellStock();
         } else if (command.equals("v")) {
             showPortfolio();
-        }else {
+        } else {
             System.out.println("Selection not valid...");
         }
     }
     
-    // MODIFIES: this
-    // EFFECTS: buy stock 
+    /**
+     * MODIFIES: this
+     * EFFECTS: buy stock
+     */ 
     private void doBuyStock() {
         System.out.println("Enter stock symbol:");
         String symbol = input.nextLine().trim().toUpperCase();
@@ -103,8 +112,10 @@ public class StockApp {
         showCashBalance();
     }
 
-    // MODIFIES: this
-    // EFFECTS: buy stock 
+    /**
+     * MODIFIES: this
+     * EFFECTS: sell stock
+     */ 
     private void doSellStock() {
         System.out.println("Enter stock symbol:");
         String symbol = input.nextLine().trim().toUpperCase();
@@ -133,6 +144,9 @@ public class StockApp {
         showCashBalance();
     }
 
+    /**
+     * SPECIFIES: print stock position information
+     */
     private void showStockPosition(StockPosition stockPosition) {
         if (stockPosition != null) {
             System.out.println("Updated stock position for " + stockPosition.getStock().getSymbol() + ": ");
@@ -144,10 +158,16 @@ public class StockApp {
         }
     }
 
+    /** 
+     * SPECIFIES: print cash balance
+     */
     private void showCashBalance() {
         System.out.println("Remaining cash balance: $" + account.getCashBalance());
     }
     
+    /**
+     * SPECIFIES: print portfolio with all stock position information
+     */
     private void showPortfolio() {
         if (account.getPortfolio().getTotalStockPositions() == 0) {
             System.out.println("No owned stock positions");
@@ -156,7 +176,7 @@ public class StockApp {
             for (StockPosition position : account.getPortfolio().getAllStockPositions().values()) {
                 String symbol = position.getStock().getSymbol();
                 int quantity = position.getQuantity();
-                BigDecimal totalCost= position.getTotalCost();
+                BigDecimal totalCost = position.getTotalCost();
                 BigDecimal averageCost = position.getAverageCost();
 
                 System.out.println(symbol + " - " + quantity + " shares");

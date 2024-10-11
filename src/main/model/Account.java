@@ -29,6 +29,7 @@ public class Account {
 
     /**
      * REQUIRES: quantity > 0
+     * MODIFIES: this
      * SPECIFIES: buy stock from portfolio, and decrease cash balance by total cost
      */
     public void buyStock(String stockSymbol, int quantity) {
@@ -42,6 +43,7 @@ public class Account {
 
     /**
      * REQUIRES: 0 < quantity <= quantity owned for in stock position
+     * MODIFIES: this
      * SPECIFIES: sell stock from portfolio, and increase cash balance by sell value
      */
     public void sellStock(String stockSymbol, int quantity) {
@@ -55,6 +57,7 @@ public class Account {
 
     /**
      * REQUIRES: depositValue > 0
+     * MODIFIES: this
      * SPECIFIES: increase cash balance by depositValue
      */
     public void deposit(double depositValue) {
@@ -63,6 +66,7 @@ public class Account {
 
     /**
      * REQUIRES: 0 < withdrawValue <= cashBalance
+     * MODIFIES: this
      * SPECIFIES: decrease cash balance by withdrawValue
      */
     public void withdraw(double withdrawValue) {

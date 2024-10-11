@@ -13,23 +13,24 @@ import java.util.Map;
 
 // Represents stock repository parsed from CSV
 public class StockRepository {
-    private static Map<String, Stock> stockData;
+    private static final String STOCK_CSV_FILE_PATH = "data/sp500_companies.csv"; // file path
+    private static Map<String, Stock> stockData; // map of stock data
     
     // Static initializer block to load stocks from csv once before
     // any objects are created or methods are called
     static {
         stockData = new HashMap<>();
         try {
-            loadStocksFromCSV("data/sp500_companies.csv");
+            loadStocksFromCSV(STOCK_CSV_FILE_PATH);
         } catch (IOException | CsvValidationException e) {
             System.out.println("Error while reading CSV: " + e.getMessage());
         }
     }
 
-    // Load stocks from the CSV file
     /** 
      * REQUIRES: filePath not empty
-     * EFFECTS: Parse stock symbol and current price from CSV to Stock
+     * MODIFIES: stockData
+     * EFFECTS: Parse stock symbol and current price from CSV to stockData
      */
     static void loadStocksFromCSV(String filePath) throws IOException, CsvValidationException {
         try {
@@ -50,17 +51,24 @@ public class StockRepository {
         }
     }
 
-
-    // Get stock by symbol
+    /**
+     * SPECIFIES: Get stock by symbol from stock repository
+     */
     public static Stock getStockBySymbol(String symbol) {
         return stockData.get(symbol);
     }
 
+    /**
+     * SPECIFIES: add stock to stock repository
+     */
     public static void addStock(Stock stock) {
         stockData.put(stock.getSymbol(), stock);
     }
 
+    /**
+     * SPECIFIES: Clear all stocks from the repository
+     */
     public static void clear() {
-        stockData.clear();  // Clear all stocks from the repository
+        stockData.clear();  
     }
 }

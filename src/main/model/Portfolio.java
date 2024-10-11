@@ -19,18 +19,16 @@ public class Portfolio {
     }
 
     /**
-     * REQUIRES: quantity > 0, pricePerShare > 0
+     * REQUIRES: quantity > 0
      * MODIFIES: this
      * EFFECTS: buy stock and add to existing position or create new one
      */
     public void buyStock(Stock stock, int quantity) {
-        StockPosition position = positions.get(stock.getSymbol());
-        // Increase position if there is already one
-        // or create a new one
+        StockPosition position = this.positions.get(stock.getSymbol());
         if (position != null) {
             position.increasePosition(quantity);
         } else {
-            positions.put(stock.getSymbol(), new StockPosition(stock, quantity));
+            this.positions.put(stock.getSymbol(), new StockPosition(stock, quantity));
         }
     }
 
@@ -40,12 +38,12 @@ public class Portfolio {
      * EFFECTS: sell stock and reduce from existing position or remove it
      */
     public void sellStock(Stock stock, int quantity) {
-        StockPosition position = positions.get(stock.getSymbol());
+        StockPosition position = this.positions.get(stock.getSymbol());
         if (position != null) {
             if (quantity > 0 && quantity < position.getQuantity()) {
                 position.decreasePosition(quantity);
             } else if (quantity == position.getQuantity()) {
-                positions.remove(stock.getSymbol());
+                this.positions.remove(stock.getSymbol());
             }
         }
     }
