@@ -28,7 +28,6 @@ public class Account {
 
     public void buyStock(String stockSymbol, int quantity) {
         Stock stock = StockRepository.getStockBySymbol(stockSymbol);
-        System.out.println(stock.getSymbol());
         BigDecimal totalCost = stock.getPrice().multiply(BigDecimal.valueOf(quantity));
         if (totalCost.doubleValue() <= this.cashBalance.doubleValue()) {
             this.portfolio.buyStock(stock, quantity);

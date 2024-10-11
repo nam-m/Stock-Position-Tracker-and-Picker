@@ -27,6 +27,10 @@ public class StockRepository {
     }
 
     // Load stocks from the CSV file
+    /** 
+     * REQUIRES: filePath not empty
+     * EFFECTS: Parse stock symbol and current price from CSV to Stock
+     */
     static void loadStocksFromCSV(String filePath) throws IOException, CsvValidationException {
         try {
             CSVReader reader = new CSVReaderBuilder(new FileReader(filePath)) 
