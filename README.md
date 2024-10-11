@@ -17,6 +17,7 @@ This app provides me with an opportunity to explore financial data processing an
 
 ## User Stories
 
+- As a user, I want to be able to deposit or withdraw cash to/from my portfolio
 - As a user, I want to be able to add a stock to my portfolio
 - As a user, I want to be able to see list of stocks in my portfolio
 - As a user, I want to be able to remove a stock from my portfolio

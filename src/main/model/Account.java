@@ -11,12 +11,13 @@ import utils.PriceUtils;
  * and stock holdings & balance
 */
 public class Account {
-    private final String id;
-    private String name;
-    private Portfolio portfolio; // account portfolio
+    private final String id;        //account id
+    private String name;            // account name
+    private Portfolio portfolio;    // account portfolio
     private BigDecimal cashBalance; // total cash value available (dollars)
 
     /**
+     * REQUIRES: initialDeposit > 0
      * SPECIFIES: Construct an account with initial deposit and new portfolio
      */
     public Account(String name, double initialDeposit) {
@@ -26,6 +27,10 @@ public class Account {
         this.cashBalance = PriceUtils.roundPrice(initialDeposit);
     }
 
+    /**
+     * REQUIRES: quantity > 0
+     * SPECIFIES: buy stock from portfolio, and decrease cash balance by total cost
+     */
     public void buyStock(String stockSymbol, int quantity) {
         Stock stock = StockRepository.getStockBySymbol(stockSymbol);
         BigDecimal totalCost = stock.getPrice().multiply(BigDecimal.valueOf(quantity));
@@ -35,6 +40,10 @@ public class Account {
         }
     }
 
+    /**
+     * REQUIRES: 0 < quantity <= quantity owned for in stock position
+     * SPECIFIES: sell stock from portfolio, and increase cash balance by sell value
+     */
     public void sellStock(String stockSymbol, int quantity) {
         Stock stock = StockRepository.getStockBySymbol(stockSymbol);
         if (quantity > 0 && quantity <= this.portfolio.getStockPosition(stock.getSymbol()).getQuantity()) {
@@ -42,6 +51,22 @@ public class Account {
             BigDecimal sellValue = stock.getPrice().multiply(BigDecimal.valueOf(quantity));
             this.cashBalance = this.cashBalance.add(sellValue);
         }
+    }
+
+    /**
+     * REQUIRES: depositValue > 0
+     * SPECIFIES: increase cash balance by depositValue
+     */
+    public void deposit(double depositValue) {
+        //stub
+    }
+
+    /**
+     * REQUIRES: 0 < withdrawValue <= cashBalance
+     * SPECIFIES: decrease cash balance by withdrawValue
+     */
+    public void withdraw(double withdrawValue) {
+        //stub
     }
 
     public String getAccountId() {
