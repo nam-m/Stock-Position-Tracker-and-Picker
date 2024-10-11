@@ -180,7 +180,7 @@ public class StockApp {
     private void doSellStock() {
         System.out.println("Enter stock symbol:");
         String symbol = input.nextLine().trim().toUpperCase();
-        
+
         if (isValidStock(symbol)) {
             System.out.println("Enter quantity:");
             int quantity = Integer.parseInt(input.nextLine().trim());
@@ -217,6 +217,7 @@ public class StockApp {
         } else {
             account.deposit(depositValue);
             System.out.println("Deposited $" + depositValue + " to account.");
+            showCashBalance();
         }
         
     }
@@ -235,6 +236,7 @@ public class StockApp {
         } else {
             account.withdraw(withdrawValue);
             System.out.println("Withdrew $" + withdrawValue + " from account.");
+            showCashBalance();
         }
     }
 
