@@ -69,6 +69,13 @@ public class Portfolio {
     }
 
     /**
+     * EFFECTS: get all stock positions in portfolio
+     */
+    public Map<String, StockPosition> getAllStockPositions() {
+        return this.positions;
+    }
+
+    /**
      * EFFECTS: get total number of stock positions
      */
     public int getTotalStockPositions() {
