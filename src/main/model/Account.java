@@ -58,7 +58,7 @@ public class Account {
      * SPECIFIES: increase cash balance by depositValue
      */
     public void deposit(double depositValue) {
-        //stub
+        this.cashBalance = this.cashBalance.add(BigDecimal.valueOf(depositValue));
     }
 
     /**
@@ -66,7 +66,7 @@ public class Account {
      * SPECIFIES: decrease cash balance by withdrawValue
      */
     public void withdraw(double withdrawValue) {
-        //stub
+        this.cashBalance = this.cashBalance.subtract(BigDecimal.valueOf(withdrawValue));
     }
 
     public String getAccountId() {
