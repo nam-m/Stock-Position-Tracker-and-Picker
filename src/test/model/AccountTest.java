@@ -1,59 +1,88 @@
 package model;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
+import java.math.BigDecimal;
+
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class AccountTest {
     private Account account;
-    private Stock stock1;
-    private Stock stock2;
 
     @BeforeEach
     void runBefore() {
-        account = new Account(10000);
-        stock1 = new Stock("NVDA", 120);
-        stock2 = new Stock("AAPL", 225);
+        StockRepository.addStock(new Stock("AAPL", 220));
+        StockRepository.addStock(new Stock("NVDA", 150));
+        account = new Account("Henry", 10000);
+    }
+
+    @AfterEach
+    void runAfter() {
+        StockRepository.clear();  // Clear the stock repository after each test
     }
 
     @Test
     void testConstructor() {
-        assertEquals(10000, account.getCashBalance());
+        assertNotNull(account.getAccountId());
+        assertEquals("Henry", account.getAccountName());
+        assertEquals(new BigDecimal("10000.00"), account.getCashBalance());
     }
 
     @Test
     void testBuyStock() {
-        account.buyStock(stock1, 5);
-        assertEquals(9400, account.getCashBalance());
+        account.buyStock("AAPL", 5);
+        assertEquals(new BigDecimal("8900.00"), account.getCashBalance());
     }
 
     @Test
     void testBuyMultipleStocks() {
-        account.buyStock(stock1, 5);
-        account.buyStock(stock2, 5);
+        account.buyStock("AAPL", 5);
+        account.buyStock("NVDA", 10);
         
-        assertEquals(8275, account.getCashBalance());
+        assertEquals(new BigDecimal("7400.00"), account.getCashBalance());
     }
 
     @Test
     void testBuyStockWithInsufficientBalance() {
-        account.buyStock(stock1, 100);
+        account.buyStock("AAPL", 100);
         // There is no change to cash balance due to insufficient balance
-        assertEquals(10000, account.getCashBalance());
+        assertEquals(new BigDecimal("10000.00"), account.getCashBalance());
     }
 
     @Test
     void testSellStock() {
-        account.sellStock(stock1, 5);
-        assertEquals(10600, account.getCashBalance());
+        account.buyStock("AAPL", 10);
+        account.sellStock("AAPL", 5);
+        assertEquals(new BigDecimal("8900.00"), account.getCashBalance());
     }
 
     @Test
     void testSellMultipleStocks() {
-        account.sellStock(stock1, 5);
-        account.sellStock(stock2, 5);
+        account.buyStock("AAPL", 7);
+        account.buyStock("NVDA", 8);
+
+        account.sellStock("AAPL", 5);
+        account.sellStock("NVDA", 4);
         
-        assertEquals(11725, account.getCashBalance());
+        assertEquals(new BigDecimal("8960.00"), account.getCashBalance());
+    }
+
+    @Test
+    void testSellMoreThanOwnedStock() {
+        account.buyStock("AAPL", 6);
+        account.sellStock("AAPL", 10);
+
+        assertEquals(new BigDecimal("8680.00"), account.getCashBalance());
+    }
+
+    @Test
+    void testSellNegativeStock() {
+        account.buyStock("AAPL", 4);
+        account.sellStock("AAPL", -5);
+
+        assertEquals(4, account.getPortfolio().getStockPosition("AAPL").getQuantity());
+        assertEquals(new BigDecimal("9120.00"), account.getCashBalance());
     }
 }
