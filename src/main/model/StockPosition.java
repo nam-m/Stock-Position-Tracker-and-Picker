@@ -37,11 +37,9 @@ public class StockPosition {
      * EFFECTS: decrease the stock position when selling existing shares
      */
     public void decreasePosition(int quantity) {
-        if (quantity > 0 && quantity <= this.quantity) {
-            double decreasedValue = stock.getPrice().doubleValue() * quantity;
-            this.totalCost = PriceUtils.roundPrice(this.totalCost.doubleValue() - decreasedValue);
-            this.quantity -= quantity;
-        }
+        double decreasedValue = stock.getPrice().doubleValue() * quantity;
+        this.totalCost = PriceUtils.roundPrice(this.totalCost.doubleValue() - decreasedValue);
+        this.quantity -= quantity;
     }
 
     public Stock getStock() {
