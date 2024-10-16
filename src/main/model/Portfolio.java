@@ -33,7 +33,7 @@ public class Portfolio {
     }
 
     /**
-     * REQUIRES: quantity > 0
+     * REQUIRES: quantity > 0 AND quantity <= quantity of the stock position
      * MODIFIES: this
      * EFFECTS: sell stock and reduce from existing position or remove it
      */

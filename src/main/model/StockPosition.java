@@ -55,7 +55,7 @@ public class StockPosition {
     }
 
     /**
-     * SPECIFIES: return average cost of the stock position
+     * EFFECTS: return average cost of the stock position
      */
     public BigDecimal getAverageCost() {
         if (this.quantity > 0) {
