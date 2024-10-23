@@ -23,3 +23,5 @@ This app provides me with an opportunity to explore financial data processing an
 - As a user, I want to be able to remove a stock from my portfolio
 - As a user, I want to be able to update the quantity or average cost of a stock when I buy/sell that stock
 - As a user, I want to see a summary of my portfolio's overall performance, including metrics like total value, total profit/loss, and percentage change
+- As a user, I want to save my entire portfolio to file
+- As a user, I want to load my entire portfolio from file
