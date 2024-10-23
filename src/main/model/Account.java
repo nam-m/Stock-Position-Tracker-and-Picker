@@ -3,6 +3,9 @@ package model;
 import java.math.BigDecimal;
 import java.util.UUID;
 
+import org.json.JSONObject;
+
+import persistence.Writable;
 import ui.StockRepository;
 import utils.PriceUtils;
 
@@ -10,7 +13,7 @@ import utils.PriceUtils;
  * Represents an account with id, owner name, transactions 
  * and stock holdings & balance
 */
-public class Account {
+public class Account implements Writable{
     private final String id;        //account id
     private String name;            // account name
     private Portfolio portfolio;    // account portfolio
@@ -89,6 +92,14 @@ public class Account {
 
     public BigDecimal getCashBalance() {
         return this.cashBalance;
+    }
+
+/**
+     * EFFECTS: convert account data to json
+     */
+    @Override
+    public JSONObject toJson() {
+
     }
 
 }
