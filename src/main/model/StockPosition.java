@@ -2,10 +2,13 @@ package model;
 
 import java.math.BigDecimal;
 
+import org.json.JSONObject;
+
+import persistence.Writable;
 import utils.PriceUtils;
 
 // Represents a stock position with a stock and the average cost of its shares
-public class StockPosition {
+public class StockPosition implements Writable{
     private Stock stock;            // reference to stock object, that has symbol and price
     private int quantity;           // total quantity of shares for this stock
     private BigDecimal totalCost;   // total cost of all shares for this stock
@@ -63,5 +66,13 @@ public class StockPosition {
             return PriceUtils.roundPrice(averageCost);
         }
         return PriceUtils.roundPrice(0);
+    }
+
+    /**
+     * EFFECTS: convert stock position to json
+     */
+    @Override
+    public JSONObject toJson() {
+
     }
 }

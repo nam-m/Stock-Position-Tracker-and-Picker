@@ -4,11 +4,14 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.json.JSONObject;
+
+import persistence.Writable;
 import utils.PriceUtils;
 
 // Represents a portfolio that manages buying/selling stocks
 // and adjusting stock positions if needed
-public class Portfolio {
+public class Portfolio implements Writable{
     private Map<String, StockPosition> positions; // map of stock symbol to StockPosition
 
     /**
@@ -78,5 +81,13 @@ public class Portfolio {
      */
     public int getTotalStockPositions() {
         return this.positions.size();
+    }
+
+    /**
+     * EFFECTS: convert portfolio to json
+     */
+    @Override
+    public JSONObject toJson() {
+
     }
 }
