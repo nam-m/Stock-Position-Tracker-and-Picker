@@ -1,11 +1,11 @@
 package persistence;
 
-import model.Portfolio;
+import model.Account;
 import org.json.JSONObject;
 
 import java.io.*;
-
-// Represents a writer that writes JSON representation of workroom to file
+// Reference: https://github.students.cs.ubc.ca/CPSC210/JsonSerializationDemo/blob/master/src/main/persistence/JsonWriter.java
+// Represents a writer that writes JSON representation of account to file
 public class JsonWriter {
     private static final int TAB = 4;
     private PrintWriter writer;
@@ -22,8 +22,8 @@ public class JsonWriter {
     }
 
     // MODIFIES: this
-    // EFFECTS: writes JSON representation of workroom to file
-    public void write(Portfolio portfolio) {
+    // EFFECTS: writes JSON representation of account to file
+    public void write(Account account) {
     }
 
     // MODIFIES: this
