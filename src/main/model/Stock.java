@@ -2,10 +2,13 @@ package model;
 
 import java.math.BigDecimal;
 
+import org.json.JSONObject;
+
+import persistence.Writable;
 import utils.PriceUtils;
 
 // Represents a stock with its symbol and price (in dollars)
-public class Stock {
+public class Stock implements Writable {
     private String symbol;      // stock symbol
     private BigDecimal price;   // current stock price
 
@@ -25,4 +28,11 @@ public class Stock {
     public BigDecimal getPrice() {
         return this.price;
     }
+
+    /**
+     * EFFECTS: convert stock to json
+     */
+    @Override
+    public JSONObject toJson() {
+    } 
 }
