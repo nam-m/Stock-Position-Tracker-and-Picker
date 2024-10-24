@@ -13,13 +13,13 @@ import org.junit.jupiter.api.Test;
 
 public class PortfolioTest {
     private Portfolio portfolio;
-    private Stock stock1;
-    private Stock stock2;
+    private Stock nvdaStock;
+    private Stock aaplStock;
 
     @BeforeEach
     void runBefore() {
-        stock1 = new Stock("NVDA", 120);
-        stock2 = new Stock("AAPL", 225);
+        nvdaStock = new Stock("NVDA", 120);
+        aaplStock = new Stock("AAPL", 225);
         portfolio = new Portfolio();
     }
 
@@ -31,29 +31,29 @@ public class PortfolioTest {
 
     @Test
     void testGetTotalValue() {
-        portfolio.buyStock(stock1, 4);
+        portfolio.buyStock(nvdaStock, 4);
         assertEquals(new BigDecimal("480.00"), portfolio.getTotalValue());
     }
 
     @Test
     void testBuyStockNewPosition() {
-        portfolio.buyStock(stock1, 4);
+        portfolio.buyStock(nvdaStock, 4);
         assertEquals(4, portfolio.getStockPosition("NVDA").getQuantity());
         assertEquals(new BigDecimal("120.00"), portfolio.getStockPosition("NVDA").getAverageCost());
     }
 
     @Test
     void testBuyStockExistingPosition() {
-        portfolio.buyStock(stock1, 4);
-        portfolio.buyStock(stock1, 6);
+        portfolio.buyStock(nvdaStock, 4);
+        portfolio.buyStock(nvdaStock, 6);
         assertEquals(10, portfolio.getStockPosition("NVDA").getQuantity());
         assertEquals(new BigDecimal("1200.00"), portfolio.getTotalValue());
     }
 
     @Test
     void testBuyDifferentStocks() {
-        portfolio.buyStock(stock1, 4);
-        portfolio.buyStock(stock2, 3);
+        portfolio.buyStock(nvdaStock, 4);
+        portfolio.buyStock(aaplStock, 3);
 
         assertEquals(4, portfolio.getStockPosition("NVDA").getQuantity());
         assertEquals(new BigDecimal("120.00"), portfolio.getStockPosition("NVDA").getAverageCost());
@@ -66,8 +66,8 @@ public class PortfolioTest {
 
     @Test
     void testSellStock() {
-        portfolio.buyStock(stock1, 4);
-        portfolio.sellStock(stock1, 3);
+        portfolio.buyStock(nvdaStock, 4);
+        portfolio.sellStock(nvdaStock, 3);
 
         assertEquals(1, portfolio.getStockPosition("NVDA").getQuantity());
         assertEquals(new BigDecimal("120.00"), portfolio.getStockPosition("NVDA").getAverageCost());
@@ -76,10 +76,10 @@ public class PortfolioTest {
 
     @Test
     void testSellDifferentStocks() {
-        portfolio.buyStock(stock1, 4);
-        portfolio.buyStock(stock2, 3);
-        portfolio.sellStock(stock1, 1);
-        portfolio.sellStock(stock2, 2);
+        portfolio.buyStock(nvdaStock, 4);
+        portfolio.buyStock(aaplStock, 3);
+        portfolio.sellStock(nvdaStock, 1);
+        portfolio.sellStock(aaplStock, 2);
 
         assertEquals(3, portfolio.getStockPosition("NVDA").getQuantity());
         assertEquals(new BigDecimal("120.00"), portfolio.getStockPosition("NVDA").getAverageCost());
@@ -91,7 +91,7 @@ public class PortfolioTest {
 
     @Test
     void testSellNonexistentStock() {
-        portfolio.sellStock(stock1, 1);
+        portfolio.sellStock(nvdaStock, 1);
 
         assertEquals(0, portfolio.getTotalStockPositions());
         assertEquals(new BigDecimal("0.00"), portfolio.getTotalValue());
@@ -99,8 +99,8 @@ public class PortfolioTest {
 
     @Test
     void testSellMoreThanOwnedStock() {
-        portfolio.buyStock(stock1, 4);
-        portfolio.sellStock(stock1, 5);
+        portfolio.buyStock(nvdaStock, 4);
+        portfolio.sellStock(nvdaStock, 5);
 
         assertEquals(4, portfolio.getStockPosition("NVDA").getQuantity());
         assertEquals(new BigDecimal("480.00"), portfolio.getTotalValue());
@@ -108,8 +108,8 @@ public class PortfolioTest {
 
     @Test
     void testSellNegativeStock() {
-        portfolio.buyStock(stock1, 4);
-        portfolio.sellStock(stock1, -5);
+        portfolio.buyStock(nvdaStock, 4);
+        portfolio.sellStock(nvdaStock, -5);
 
         assertEquals(4, portfolio.getStockPosition("NVDA").getQuantity());
         assertEquals(new BigDecimal("480.00"), portfolio.getTotalValue());
@@ -117,8 +117,8 @@ public class PortfolioTest {
 
     @Test
     void testSellAllStockPosition() {
-        portfolio.buyStock(stock1, 4);
-        portfolio.sellStock(stock1, 4);
+        portfolio.buyStock(nvdaStock, 4);
+        portfolio.sellStock(nvdaStock, 4);
 
         assertNull(portfolio.getStockPosition("NVDA"));
         assertEquals(0, portfolio.getTotalStockPositions());
@@ -135,25 +135,30 @@ public class PortfolioTest {
     @Test
     void testGetAllStockPositionsWithStocks() {
 
-        portfolio.buyStock(stock1, 4);;
-        portfolio.buyStock(stock2, 4);
+        portfolio.buyStock(nvdaStock, 4);;
+        portfolio.buyStock(aaplStock, 4);
 
         // Retrieve the stock positions and verify
         Map<String, StockPosition> stockPositions = portfolio.getAllStockPositions();
 
         assertEquals(2, stockPositions.size());
-        assertTrue(stockPositions.containsKey(stock1.getSymbol()));
-        assertTrue(stockPositions.containsKey(stock2.getSymbol()));
+        assertTrue(stockPositions.containsKey(nvdaStock.getSymbol()));
+        assertTrue(stockPositions.containsKey(aaplStock.getSymbol()));
     }
 
     @Test
     void testToJson() {
-        portfolio.buyStock(stock1, 4);
-        portfolio.buyStock(stock2, 3);
+        portfolio.buyStock(aaplStock, 3);
+        portfolio.buyStock(nvdaStock, 4);
         
-        String expectedJson = "\"NVDA\":{\"symbol\":\"NVDA\",\"quantity\":4,\"averagePrice\":\"120.00\"}," 
-                            + "\"AAPL\":{\"symbol\":\"AAPL\",\"quantity\":3,\"averagePrice\":\"225.00\"},";
+        String expectedString = "{\"positions\":" 
+                                    + "{\"AAPL\":{\"symbol\":\"AAPL\",\"quantity\":3," 
+                                    + "\"averagePrice\":\"225.00\"}," 
+                                    + "\"NVDA\":{\"symbol\":\"NVDA\",\"quantity\":4," 
+                                    + "\"averagePrice\":\"120.00\"}}}";
+        JSONObject expectedJson = new JSONObject(expectedString);
         JSONObject jsonObject = portfolio.toJson();
+        System.out.println(jsonObject.toString());
         assertTrue(jsonObject.similar(expectedJson));
     }
 }

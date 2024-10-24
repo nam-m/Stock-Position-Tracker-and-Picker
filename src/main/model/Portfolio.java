@@ -11,7 +11,7 @@ import utils.PriceUtils;
 
 // Represents a portfolio that manages buying/selling stocks
 // and adjusting stock positions if needed
-public class Portfolio implements Writable{
+public class Portfolio implements Writable {
     private Map<String, StockPosition> positions; // map of stock symbol to StockPosition
 
     /**
@@ -88,6 +88,16 @@ public class Portfolio implements Writable{
      */
     @Override
     public JSONObject toJson() {
+        JSONObject json = new JSONObject();
+        JSONObject positionsJson = new JSONObject();
 
+        for (Map.Entry<String, StockPosition> entry : positions.entrySet()) {
+            String symbol = entry.getKey();
+            StockPosition position = entry.getValue();
+            positionsJson.put(symbol, position.toJson());  // Use StockPosition's toJson method
+        }
+
+        json.put("positions", positionsJson);
+        return json;
     }
 }
