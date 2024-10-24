@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.math.BigDecimal;
 import java.util.Map;
 
+import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -143,5 +144,16 @@ public class PortfolioTest {
         assertEquals(2, stockPositions.size());
         assertTrue(stockPositions.containsKey(stock1.getSymbol()));
         assertTrue(stockPositions.containsKey(stock2.getSymbol()));
+    }
+
+    @Test
+    void testToJson() {
+        portfolio.buyStock(stock1, 4);
+        portfolio.buyStock(stock2, 3);
+        
+        String expectedJson = "\"NVDA\":{\"symbol\":\"NVDA\",\"quantity\":4,\"averagePrice\":\"120.00\"}," 
+                            + "\"AAPL\":{\"symbol\":\"AAPL\",\"quantity\":3,\"averagePrice\":\"225.00\"},";
+        JSONObject jsonObject = portfolio.toJson();
+        assertTrue(jsonObject.similar(expectedJson));
     }
 }

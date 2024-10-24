@@ -1,9 +1,11 @@
 package model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 
+import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -72,5 +74,12 @@ public class StockPositionTest {
         assertEquals(0, position.getQuantity());
         assertEquals(new BigDecimal("0.00"), position.getTotalCost());
         assertEquals(new BigDecimal("0.00"), position.getAverageCost());
+    }
+
+    @Test
+    void testToJson() {
+        String expectedJson = "\"NVDA\":{\"symbol\":\"NVDA\",\"quantity\":3,\"averagePrice\":\"110.00\"}";
+        JSONObject jsonObject = position.toJson();
+        assertTrue(jsonObject.similar(expectedJson));
     }
 }

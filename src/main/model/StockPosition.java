@@ -8,7 +8,7 @@ import persistence.Writable;
 import utils.PriceUtils;
 
 // Represents a stock position with a stock and the average cost of its shares
-public class StockPosition implements Writable{
+public class StockPosition implements Writable {
     private Stock stock;            // reference to stock object, that has symbol and price
     private int quantity;           // total quantity of shares for this stock
     private BigDecimal totalCost;   // total cost of all shares for this stock

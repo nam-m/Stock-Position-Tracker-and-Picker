@@ -51,11 +51,9 @@ public class Account implements Writable{
      */
     public void sellStock(String stockSymbol, int quantity) {
         Stock stock = StockRepository.getStockBySymbol(stockSymbol);
-        if (quantity > 0 && quantity <= this.portfolio.getStockPosition(stock.getSymbol()).getQuantity()) {
-            this.portfolio.sellStock(stock, quantity);
-            double sellValue = stock.getPrice().doubleValue() * quantity;
-            this.cashBalance = PriceUtils.roundPrice(this.cashBalance.doubleValue() + sellValue);
-        }
+        this.portfolio.sellStock(stock, quantity);
+        double sellValue = stock.getPrice().doubleValue() * quantity;
+        this.cashBalance = PriceUtils.roundPrice(this.cashBalance.doubleValue() + sellValue);
     }
 
     /**
