@@ -78,8 +78,9 @@ public class StockPositionTest {
 
     @Test
     void testToJson() {
-        String expectedJson = "\"NVDA\":{\"symbol\":\"NVDA\",\"quantity\":3,\"averagePrice\":\"110.00\"}";
+        JSONObject expectedJson = new JSONObject("{\"symbol\":\"NVDA\",\"quantity\":3,\"averagePrice\":\"110.00\"}");
         JSONObject jsonObject = position.toJson();
+        System.out.println(jsonObject.toString());
         assertTrue(jsonObject.similar(expectedJson));
     }
 }

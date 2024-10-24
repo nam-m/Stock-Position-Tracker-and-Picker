@@ -73,6 +73,10 @@ public class StockPosition implements Writable {
      */
     @Override
     public JSONObject toJson() {
-
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("symbol", this.getStock().getSymbol());
+        jsonObject.put("quantity", this.getQuantity());
+        jsonObject.put("averagePrice", this.getAverageCost().toString());
+        return jsonObject;
     }
 }
