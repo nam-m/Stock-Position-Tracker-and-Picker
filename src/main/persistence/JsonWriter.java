@@ -6,6 +6,7 @@ import org.json.JSONObject;
 import java.io.*;
 // Reference: https://github.students.cs.ubc.ca/CPSC210/JsonSerializationDemo/blob/master/src/main/persistence/JsonWriter.java
 // Represents a writer that writes JSON representation of account to file
+
 public class JsonWriter {
     private static final int TAB = 4;
     private PrintWriter writer;

@@ -13,7 +13,7 @@ import utils.PriceUtils;
  * Represents an account with id, owner name, transactions 
  * and stock holdings & balance
 */
-public class Account implements Writable{
+public class Account implements Writable {
     private final String id;        //account id
     private String name;            // account name
     private Portfolio portfolio;    // account portfolio

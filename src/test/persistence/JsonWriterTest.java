@@ -1,13 +1,16 @@
 package persistence;
 
 import org.json.JSONObject;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import model.Account;
+import model.Stock;
+import ui.StockRepository;
 
+import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -18,7 +21,16 @@ class JsonWriterTest extends JsonTest {
 
     @BeforeEach
     void setUp() {
+        StockRepository.addStock(new Stock("AAPL", 220));
+        StockRepository.addStock(new Stock("NVDA", 150));
         account = new Account("Mary", 10000);
+    }
+
+    @AfterEach
+    void cleanUp() {
+        StockRepository.clear();  // Clear the stock repository after each test
+        File jsonTestFile = new File(TEST_FILE_PATH);
+        jsonTestFile.delete();
     }
 
     @Test
@@ -52,7 +64,8 @@ class JsonWriterTest extends JsonTest {
     @Test
     void testWriterAccountWithGeneralPortfolio() {
         try {
-            account.buyStock("APPL", 5);
+            System.out.println(account.toJson().toString());
+            account.buyStock("AAPL", 5);
             account.buyStock("META", 6);
             JsonWriter writer = new JsonWriter(TEST_FILE_PATH);
             writer.open();
