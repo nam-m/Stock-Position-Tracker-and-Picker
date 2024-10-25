@@ -95,7 +95,7 @@ public class AccountTest {
         account.buyStock("AAPL", 5);
         account.buyStock("NVDA", 10);
         
-        String expectedString = "{\"name\":\"Henry\",\"cashBalance\":\"7400.00\",\"portfolio\":{\"positions\":" 
+        String expectedString = "{\"name\":\"Henry\",\"balance\":\"7400.00\",\"portfolio\":{\"positions\":" 
                             + "{\"AAPL\":{\"symbol\":\"AAPL\",\"quantity\":5,\"averagePrice\":\"220.00\"}," 
                             + "\"NVDA\":{\"symbol\":\"NVDA\",\"quantity\":10,\"averagePrice\":\"150.00\"}}}}";
         JSONObject expectedJson = new JSONObject(expectedString);

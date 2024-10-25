@@ -99,7 +99,7 @@ public class Account implements Writable {
     public JSONObject toJson() {
         JSONObject json = new JSONObject();
         json.put("name", this.getAccountName());
-        json.put("cashBalance", this.getCashBalance().toString());
+        json.put("balance", this.getCashBalance().toString());
         json.put("portfolio", this.getPortfolio().toJson());
         return json;
     }

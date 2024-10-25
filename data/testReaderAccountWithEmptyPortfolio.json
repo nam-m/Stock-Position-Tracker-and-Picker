@@ -1,5 +1,7 @@
 {
     "name": "Henry",
     "balance": "10000.00",
-    "portfolio": {}
+    "portfolio": {
+        "positions": {}
+    }
 }

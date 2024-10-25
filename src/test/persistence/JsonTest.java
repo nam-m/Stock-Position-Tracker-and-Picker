@@ -22,7 +22,7 @@ public class JsonTest {
     // EFFECTS: checks that account fields are correctly saved in JSON
     protected void checkAccountDetails(JSONObject jsonObject, Account account) {
         assertTrue(jsonObject.getString("name").equals(account.getAccountName()));
-        assertTrue(jsonObject.getString("cashBalance").equals(account.getCashBalance().toString()));
+        assertTrue(jsonObject.getString("balance").equals(account.getCashBalance().toString()));
     }
 
     // EFFECTS: checks that portfolio and stock position fields are correctly saved in JSON

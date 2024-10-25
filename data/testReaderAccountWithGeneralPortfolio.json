@@ -2,15 +2,17 @@
     "name": "Henry",
     "balance": "7400.00",
     "portfolio": {
-        "AAPL": {
-            "symbol": "AAPL",
-            "quantity": 5,
-            "averagePrice": "220.00"
-        },
-        "NVDA": {
-            "symbol": "NVDA",
-            "quantity": 10,
-            "averagePrice": "150.00"
-        }
+        "positions": {
+           "AAPL": {
+                "symbol": "AAPL",
+                "quantity": 5,
+                "averagePrice": "220.00"
+            },
+            "NVDA": {
+                "symbol": "NVDA",
+                "quantity": 10,
+                "averagePrice": "150.00"
+            } 
+        }   
     }
 }
