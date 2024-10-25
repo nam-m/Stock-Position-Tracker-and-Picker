@@ -6,10 +6,12 @@ import java.util.Scanner;
 import model.Account;
 import model.Stock;
 import model.StockPosition;
+import utils.InputHandler;
 
 // Represents stock picker application
 // Reference: https://github.students.cs.ubc.ca/CPSC210/TellerApp/blob/main/src/main/ca/ubc/cpsc210/bank/ui/TellerApp.java
-public class StockApp {
+
+public class StockApp extends InputHandler {
     private Account account; // stock app account
     private Scanner input;   // console input
 
@@ -152,22 +154,16 @@ public class StockApp {
         String symbol = input.nextLine().trim().toUpperCase();
 
         if (isValidStock(symbol)) {
-            System.out.println("Enter quantity:");
-            int quantity = Integer.parseInt(input.nextLine().trim());
-
-            if (quantity <= 0) {
-                System.out.println("Cannot buy negative quantity\n");
+            int quantity = getValidatedIntegerInput("Enter quantity:");
+            Stock stock = StockRepository.getStockBySymbol(symbol);
+            BigDecimal totalCost = stock.getPrice().multiply(BigDecimal.valueOf(quantity));
+            if (totalCost.compareTo(account.getCashBalance()) > 0) {
+                System.out.println("Cannot buy stock with total value of $" + totalCost + "\n");
             } else {
-                Stock stock = StockRepository.getStockBySymbol(symbol);
-                BigDecimal totalCost = stock.getPrice().multiply(BigDecimal.valueOf(quantity));
-                if (totalCost.compareTo(account.getCashBalance()) > 0) {
-                    System.out.println("Cannot buy stock with total value of $" + totalCost + "\n");
-                } else {
-                    account.buyStock(symbol, quantity);
-                    System.out.println("Bought " + quantity + " shares of " + symbol + "\n");
-                    // Retrieve the updated stock position from portfolio
-                    showStockPosition(account.getPortfolio().getStockPosition(symbol));
-                }
+                account.buyStock(symbol, quantity);
+                System.out.println("Bought " + quantity + " shares of " + symbol + "\n");
+                // Retrieve the updated stock position from portfolio
+                showStockPosition(account.getPortfolio().getStockPosition(symbol));
             }
         }
         showCashBalance();
@@ -182,24 +178,19 @@ public class StockApp {
         String symbol = input.nextLine().trim().toUpperCase();
 
         if (isValidStock(symbol)) {
-            System.out.println("Enter quantity:");
-            int quantity = Integer.parseInt(input.nextLine().trim());
-            if (quantity <= 0) {
-                System.out.println("Cannot sell negative quantity\n");
+            int quantity = getValidatedIntegerInput("Enter quantity:");
+            StockPosition updatedPosition = account.getPortfolio().getStockPosition(symbol);
+            if (updatedPosition == null) {
+                System.out.println("Not found stock position for " + symbol);
             } else {
-                StockPosition updatedPosition = account.getPortfolio().getStockPosition(symbol);
-                if (updatedPosition == null) {
-                    System.out.println("Not found stock position for " + symbol);
+                if (quantity > updatedPosition.getQuantity()) {
+                    System.out.println("Cannot sell more than " + updatedPosition.getQuantity() + " shares\n");
                 } else {
-                    if (quantity > updatedPosition.getQuantity()) {
-                        System.out.println("Cannot sell more than " + updatedPosition.getQuantity() + " shares\n");
-                    } else {
-                        account.sellStock(symbol, quantity);
-                        System.out.println("Sold " + quantity + " shares of " + symbol + "\n");
-                        // Retrieve the updated stock position from portfolio
-                        showStockPosition(updatedPosition);
-                    } 
-                }
+                    account.sellStock(symbol, quantity);
+                    System.out.println("Sold " + quantity + " shares of " + symbol + "\n");
+                    // Retrieve the updated stock position from portfolio
+                    showStockPosition(updatedPosition);
+                } 
             }
         }
         showCashBalance();
@@ -209,29 +200,18 @@ public class StockApp {
      * SPECIFIES: deposit into cash balance
      */
     private void doDeposit() {
-        System.out.println("Enter amount to deposit:");
-        String deposit = input.nextLine();
-        double depositValue = Double.parseDouble(deposit);
-        if (depositValue <= 0) {
-            System.out.println("Cannot deposit negative or zero amount");
-        } else {
-            account.deposit(depositValue);
-            System.out.println("Deposited $" + depositValue + " to account.");
-            showCashBalance();
-        }
-        
+        double depositValue = getValidatedDoubleInput("Enter amount to deposit:");
+        account.deposit(depositValue);
+        System.out.println("Deposited $" + depositValue + " to account.");
+        showCashBalance();        
     }
 
     /**
      * SPECIFIES: withdraw from cash balance
      */
     private void doWithdraw() {
-        System.out.println("Enter amount to withdraw:");
-        String withdrawInput = input.nextLine();
-        double withdrawValue = Double.parseDouble(withdrawInput);
-        if (withdrawValue <= 0) {
-            System.out.println("Cannot withdraw negative or zero amount");
-        } else if (withdrawValue > this.account.getCashBalance().doubleValue()) {
+        double withdrawValue = getValidatedDoubleInput("Enter amount to withdraw:");
+        if (withdrawValue > this.account.getCashBalance().doubleValue()) {
             System.out.println("Cannot withdraw more than cash balance");
         } else {
             account.withdraw(withdrawValue);
