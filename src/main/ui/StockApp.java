@@ -275,18 +275,6 @@ public class StockApp extends InputHandler {
             }
         }
     }
-    
-    /**
-     * SPECIFIES: check if stock symbol is in stock repository
-     */
-    private boolean isValidStock(String symbol) {
-        Stock stock = StockRepository.getStockBySymbol(symbol);
-        if (stock == null) {
-            System.out.println("Invalid stock symbol. Please try again");
-            return false;
-        }
-        return true;
-    }
 
     // EFFECTS: saves the workroom to file
     private void saveAccount() {
