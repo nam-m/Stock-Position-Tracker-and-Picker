@@ -2,6 +2,9 @@ package utils;
 
 import java.util.Scanner;
 
+import model.Stock;
+import ui.StockRepository;
+
 public abstract class InputHandler {
     protected Scanner input = new Scanner(System.in);
 
@@ -67,9 +70,23 @@ public abstract class InputHandler {
             input = handlePromptInput(prompt);
             if (input.isEmpty()) {
                 System.out.println("No input provided. Please enter a valid input.");
-                return null;
             }
         }
         return input;
+    }
+
+    // REQUIRES: prompt not empty
+    // EFFECTS: repeatedly prompts until a non-empty input string is provided; returns the string
+    protected String getValidatedStockInput(String prompt) {
+        String symbol = "";
+        Stock stock = null;
+        while (stock == null) {
+            symbol = getValidatedStringInput(prompt).toUpperCase();
+            stock = StockRepository.getStockBySymbol(symbol);
+            if (stock == null) {
+                System.out.println("Stock not found. Please enter other stock symbol.");
+            }
+        }
+        return symbol;
     }
 }

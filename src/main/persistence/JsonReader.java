@@ -74,7 +74,6 @@ public class JsonReader {
     // REQUIRES: jsonObject is not empty
     // EFFECTS: parses stock position from JSON object and returns it
     private StockPosition parseStockPosition(JSONObject jsonObject) {
-        System.out.println("position: " + jsonObject.toString());
         String symbol = jsonObject.getString("symbol");
         int quantity = jsonObject.getInt("quantity");
         double averagePrice = jsonObject.getDouble("averagePrice");

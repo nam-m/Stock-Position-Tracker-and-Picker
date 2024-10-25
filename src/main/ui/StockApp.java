@@ -1,24 +1,34 @@
 package ui;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Scanner;
 
 import model.Account;
 import model.Stock;
 import model.StockPosition;
+import persistence.JsonReader;
+import persistence.JsonWriter;
 import utils.InputHandler;
 
 // Represents stock picker application
 // Reference: https://github.students.cs.ubc.ca/CPSC210/TellerApp/blob/main/src/main/ca/ubc/cpsc210/bank/ui/TellerApp.java
 
 public class StockApp extends InputHandler {
+    private static final String JSON_STORE = "./data/account.json";
     private Account account; // stock app account
     private Scanner input;   // console input
+    private JsonWriter jsonWriter;
+    private JsonReader jsonReader;
 
     /**
      * EFFECTS: runs the stock picker application
     */
     public StockApp() {
+        account = new Account("Henry", 10000);
+        jsonWriter = new JsonWriter(JSON_STORE);
+        jsonReader = new JsonReader(JSON_STORE);
         runStockApp();
     }
 
@@ -67,6 +77,8 @@ public class StockApp extends InputHandler {
         System.out.println("\tb -> buy stock");
         System.out.println("\ts -> sell stock");
         System.out.println("\tv -> view portfolio");
+        System.out.println("\tsave -> save account to json file");
+        System.out.println("\tload -> load account from file");
         System.out.println("\tq -> quit");
     }
 
@@ -87,6 +99,12 @@ public class StockApp extends InputHandler {
                 break;
             case "v":
                 showPortfolio();
+                break;
+            case "save":
+                saveAccount();
+                break;
+            case "load":
+                loadAccount();
                 break;
             default:
                 System.out.println("Selection not valid...");
@@ -150,22 +168,20 @@ public class StockApp extends InputHandler {
      * EFFECTS: buy stock
      */ 
     private void doBuyStock() {
-        System.out.println("Enter stock symbol:");
-        String symbol = input.nextLine().trim().toUpperCase();
+        String symbol = getValidatedStockInput("Enter stock symbol:");
 
-        if (isValidStock(symbol)) {
-            int quantity = getValidatedIntegerInput("Enter quantity:");
-            Stock stock = StockRepository.getStockBySymbol(symbol);
-            BigDecimal totalCost = stock.getPrice().multiply(BigDecimal.valueOf(quantity));
-            if (totalCost.compareTo(account.getCashBalance()) > 0) {
-                System.out.println("Cannot buy stock with total value of $" + totalCost + "\n");
-            } else {
-                account.buyStock(symbol, quantity);
-                System.out.println("Bought " + quantity + " shares of " + symbol + "\n");
-                // Retrieve the updated stock position from portfolio
-                showStockPosition(account.getPortfolio().getStockPosition(symbol));
-            }
+        int quantity = getValidatedIntegerInput("Enter quantity:");
+        Stock stock = StockRepository.getStockBySymbol(symbol);
+        BigDecimal totalCost = stock.getPrice().multiply(BigDecimal.valueOf(quantity));
+        if (totalCost.compareTo(account.getCashBalance()) > 0) {
+            System.out.println("Cannot buy stock with total value of $" + totalCost + "\n");
+        } else {
+            account.buyStock(symbol, quantity);
+            System.out.println("Bought " + quantity + " shares of " + symbol + "\n");
+            // Retrieve the updated stock position from portfolio
+            showStockPosition(account.getPortfolio().getStockPosition(symbol));
         }
+
         showCashBalance();
     }
 
@@ -174,25 +190,23 @@ public class StockApp extends InputHandler {
      * EFFECTS: sell stock
      */ 
     private void doSellStock() {
-        System.out.println("Enter stock symbol:");
-        String symbol = input.nextLine().trim().toUpperCase();
+        String symbol = getValidatedStockInput("Enter stock symbol:");
 
-        if (isValidStock(symbol)) {
-            int quantity = getValidatedIntegerInput("Enter quantity:");
-            StockPosition updatedPosition = account.getPortfolio().getStockPosition(symbol);
-            if (updatedPosition == null) {
-                System.out.println("Not found stock position for " + symbol);
+        int quantity = getValidatedIntegerInput("Enter quantity:");
+        StockPosition updatedPosition = account.getPortfolio().getStockPosition(symbol);
+        if (updatedPosition == null) {
+            System.out.println("Not found stock position for " + symbol);
+        } else {
+            if (quantity > updatedPosition.getQuantity()) {
+                System.out.println("Cannot sell more than " + updatedPosition.getQuantity() + " shares\n");
             } else {
-                if (quantity > updatedPosition.getQuantity()) {
-                    System.out.println("Cannot sell more than " + updatedPosition.getQuantity() + " shares\n");
-                } else {
-                    account.sellStock(symbol, quantity);
-                    System.out.println("Sold " + quantity + " shares of " + symbol + "\n");
-                    // Retrieve the updated stock position from portfolio
-                    showStockPosition(updatedPosition);
-                } 
-            }
+                account.sellStock(symbol, quantity);
+                System.out.println("Sold " + quantity + " shares of " + symbol + "\n");
+                // Retrieve the updated stock position from portfolio
+                showStockPosition(updatedPosition);
+            } 
         }
+
         showCashBalance();
     }
 
@@ -272,5 +286,28 @@ public class StockApp extends InputHandler {
             return false;
         }
         return true;
+    }
+
+    // EFFECTS: saves the workroom to file
+    private void saveAccount() {
+        try {
+            jsonWriter.open();
+            jsonWriter.write(account);
+            jsonWriter.close();
+            System.out.println("Saved account for " + account.getAccountName() + " to " + JSON_STORE);
+        } catch (FileNotFoundException e) {
+            System.out.println("Unable to write to file: " + JSON_STORE);
+        }
+    }
+
+    // MODIFIES: this
+    // EFFECTS: loads workroom from file
+    private void loadAccount() {
+        try {
+            account = jsonReader.read();
+            System.out.println("Loaded account for " + account.getAccountName() + " from " + JSON_STORE);
+        } catch (IOException e) {
+            System.out.println("Unable to read from file: " + JSON_STORE);
+        }
     }
 }
