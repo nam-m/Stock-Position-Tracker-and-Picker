@@ -270,8 +270,8 @@ public class StockApp extends InputHandler {
                 BigDecimal averageCost = position.getAverageCost();
 
                 System.out.println(symbol + " - " + quantity + " shares");
-                System.out.println("  Total Value: $" + totalCost);
-                System.out.println("  Average Cost: $" + averageCost);
+                System.out.println("\tTotal Value: $" + totalCost);
+                System.out.println("\tAverage Cost: $" + averageCost);
             }
         }
     }
