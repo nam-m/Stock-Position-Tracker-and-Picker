@@ -11,12 +11,21 @@ import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.table.TableCellEditor;
 
+import model.Account;
+import model.Stock;
+
 public class ButtonEditor extends AbstractCellEditor implements TableCellEditor {
     private JPanel panel = new JPanel();
     private JButton buyButton;
     private JButton sellButton;
 
-    public ButtonEditor(JCheckBox checkBox) {
+    private JTable table;
+    private Account account;
+
+    public ButtonEditor(JCheckBox checkBox, JTable table, Account account) {
+        this.table = table;
+        this.account = account;
+
         panel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 0));
         buyButton = new JButton("Buy");
         sellButton = new JButton("Sell");
@@ -30,16 +39,24 @@ public class ButtonEditor extends AbstractCellEditor implements TableCellEditor 
     }
 
     private void handleBuy() {
-        // System.out.println("Buy button clicked");
-        // stopCellEditing(); // Stop editing to finalize the action
-        JOptionPane.showMessageDialog(null, "Buy action performed!");
+        int selectedRow = table.getSelectedRow();
+        if (selectedRow != -1) {
+            String stockSymbol = (String) table.getValueAt(selectedRow, 0);
+            // Call buyStock method with the symbol (and quantity if applicable)
+            account.buyStock(stockSymbol, 1);
+            JOptionPane.showMessageDialog(null, "Buy action performed for " + stockSymbol);
+        }
         fireEditingStopped(); // Stop editing after the action
     }
 
     private void handleSell() {
-        // System.out.println("Sell button clicked");
-        // stopCellEditing();
-        JOptionPane.showMessageDialog(null, "Sell action performed!");
+        int selectedRow = table.getSelectedRow();
+        if (selectedRow != -1) {
+            String stockSymbol = (String) table.getValueAt(selectedRow, 0);
+            // Call sellStock method with the symbol (and quantity if applicable)
+            account.sellStock(stockSymbol, 1);
+            JOptionPane.showMessageDialog(null, "Sell action performed for " + stockSymbol);
+        }
         fireEditingStopped(); // Stop editing after the action
     }
 

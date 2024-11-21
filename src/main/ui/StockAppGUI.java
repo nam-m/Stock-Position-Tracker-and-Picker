@@ -17,6 +17,7 @@ import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.table.DefaultTableModel;
 
+import model.Account;
 import model.Stock;
 
 public class StockAppGUI {
@@ -26,7 +27,10 @@ public class StockAppGUI {
     private final JPanel stockPanel;
     private JTable stockTable;
 
+    private Account account;
+
     public StockAppGUI() {
+        account = new Account("Henry", 10000);
         frame = new JFrame("Stock Picker");
         frame.setSize(800, 600);
         frame.setLocationRelativeTo(null);
@@ -86,12 +90,8 @@ public class StockAppGUI {
     private void showPortfolioPanel() {
         mainPanel.removeAll();
         mainPanel.add(new JLabel("Portfolio"), BorderLayout.NORTH);
-
-        // Initialize the stock table
-        // stockTable = createStockTable(getAllStocksData());
         JScrollPane tableScrollPane = new JScrollPane(stockTable);
         mainPanel.add(tableScrollPane, BorderLayout.CENTER);
-
         refreshMainPanel();
     }
 
@@ -100,10 +100,6 @@ public class StockAppGUI {
         mainPanel.removeAll();
         mainPanel.add(new JLabel("S&P 500 Stocks"), BorderLayout.NORTH);
         mainPanel.add(stockPanel, BorderLayout.CENTER);
-
-        // Create stock table and add to panel
-        // JTable stockTable = createStockTable();
-        // stockPanel.add(new JScrollPane(stockTable), BorderLayout.CENTER);
         refreshMainPanel();
     }
 
@@ -112,6 +108,8 @@ public class StockAppGUI {
     
         // Create and add the stock table
         JTable stockTable = createStockTable();
+        // StockTable table = new StockTable(account);
+        // JTable stockTable = table.createStockTable();
         JScrollPane scrollPane = new JScrollPane(stockTable);
     
         stockPanel.add(scrollPane, BorderLayout.CENTER);
@@ -162,7 +160,7 @@ public class StockAppGUI {
         // Add custom renderer and editor for the "Actions" column
         table.getColumn("Actions").setCellRenderer(new ButtonRenderer());
         // Editor requires a checkBox
-        table.getColumn("Actions").setCellEditor(new ButtonEditor(new JCheckBox())); 
+        table.getColumn("Actions").setCellEditor(new ButtonEditor(new JCheckBox(), table, account)); 
 
         return table;
     }
