@@ -15,6 +15,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
 import model.Account;
@@ -26,24 +27,27 @@ public class StockAppGUI {
     private final JPanel sidebarPanel;
     private final JPanel mainPanel;
     private final JPanel stockPanel;
-    // private JTable stockTable;
-    // private JTable portfolioTable;
+    private JTable stockTable;
+    private JTable portfolioTable;
+    private DefaultTableModel portfolioModel;
+    private DefaultTableModel stockModel;
 
     private Account account;
 
     public StockAppGUI() {
         account = new Account("Henry", 10000);
         frame = new JFrame("Stock Picker");
-        // stockTable = createStockTable();
-        // portfolioTable = createPortfolioTable();
 
-        frame.setSize(800, 600);
+        frame.setSize(1024, 768);
         frame.setLocationRelativeTo(null);
         frame.setLayout(new BorderLayout());
 
+        initializeTables();
+
         sidebarPanel = initSidebar();
         mainPanel = new JPanel(new BorderLayout());
-        stockPanel = new JPanel();
+        stockPanel = new JPanel(new BorderLayout());
+        
         setupStockPanel();
 
         frame.add(sidebarPanel, BorderLayout.WEST);
@@ -53,8 +57,39 @@ public class StockAppGUI {
         showStocksPanel(); 
 
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.pack();
         frame.setVisible(true);
+    }
+
+    private void initializeTables() {
+        // Initialize stock table
+        String[] stockColumns = {"Symbol", "Price", "Actions"};
+        Object[][] stockData = getAllStocksData();
+        stockModel = new DefaultTableModel(stockData, stockColumns) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return column == 2;
+            }
+        };
+        stockTable = new JTable(stockModel);
+        stockTable.setRowHeight(30);
+        stockTable.getColumn("Actions").setCellRenderer(new ButtonRenderer());
+        stockTable.getColumn("Actions").setCellEditor(
+            new ButtonEditor(new JCheckBox(), stockTable, account, this));
+
+        // Initialize portfolio table
+        String[] portfolioColumns = {"Symbol", "Price", "Quantity", "Total Value", "Actions"};
+        Object[][] portfolioData = getPortfolioStockData(account);
+        portfolioModel = new DefaultTableModel(portfolioData, portfolioColumns) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return column == 4;
+            }
+        };
+        portfolioTable = new JTable(portfolioModel);
+        portfolioTable.setRowHeight(30);
+        portfolioTable.getColumn("Actions").setCellRenderer(new ButtonRenderer());
+        portfolioTable.getColumn("Actions").setCellEditor(
+            new ButtonEditor(new JCheckBox(), portfolioTable, account, this));
     }
 
     // EFFECTS: Initialize sidebar with buttons
@@ -95,7 +130,7 @@ public class StockAppGUI {
     private void showPortfolioPanel() {
         mainPanel.removeAll();
         mainPanel.add(new JLabel("Portfolio"), BorderLayout.NORTH);
-        JTable portfolioTable = createPortfolioTable();
+        // JTable portfolioTable = createPortfolioTable();
         JScrollPane tableScrollPane = new JScrollPane(portfolioTable);
         mainPanel.add(tableScrollPane, BorderLayout.CENTER);
         refreshMainPanel();
@@ -111,7 +146,6 @@ public class StockAppGUI {
 
     private void setupStockPanel() {
         stockPanel.setLayout(new BorderLayout());
-        JTable stockTable = createStockTable();
         JScrollPane scrollPane = new JScrollPane(stockTable);
         stockPanel.add(scrollPane, BorderLayout.CENTER);
     }
@@ -162,46 +196,22 @@ public class StockAppGUI {
         mainPanel.repaint();
     }
 
-    // EFFECTS: Create stock table with columns: symbol, price, actions
-    private JTable createStockTable() {
-        String[] columnNames = {"Symbol", "Price", "Actions"};
-        Object[][] stockData = getAllStocksData();
-        DefaultTableModel stockModel = new DefaultTableModel(stockData, columnNames) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                // Only make the "Actions" column editable
-                return column == 2;
+    // Method to update both tables after transactions
+    public void updateTables() {
+        SwingUtilities.invokeLater(() -> {
+            // Update portfolio table
+            portfolioModel.setRowCount(0);
+            Object[][] newPortfolioData = getPortfolioStockData(account);
+            for (Object[] row : newPortfolioData) {
+                portfolioModel.addRow(row);
             }
-        };
-        JTable table = new JTable(stockModel);
-        table.setRowHeight(30);
-        // Add custom renderer and editor for the "Actions" column
-        table.getColumn("Actions").setCellRenderer(new ButtonRenderer());
-        // Editor requires a checkBox
-        table.getColumn("Actions").setCellEditor(new ButtonEditor(new JCheckBox(), table, account)); 
 
-        return table;
-    }
+            // Update cash balance display if it exists
+            // updateCashBalance();
 
-    // EFFECTS: create portfolio table with columns: symbol, quantity, price, total value
-    public JTable createPortfolioTable() {
-        String[] columnNames = {"Symbol", "Price", "Quantity", "Total Value", "Actions"};
-        Object[][] stockData = getPortfolioStockData(account);
-        DefaultTableModel portfolioModel = new DefaultTableModel(stockData, columnNames) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                // Only make the "Actions" column editable (Buy/Sell buttons)
-                return column == 4;
-            }
-        };
-
-        JTable table = new JTable(portfolioModel);
-        table.setRowHeight(30);
-        // Add custom renderer and editor for the "Actions" column
-        table.getColumn("Actions").setCellRenderer(new ButtonRenderer());
-        table.getColumn("Actions").setCellEditor(new ButtonEditor(new JCheckBox(), table, account));
-
-        return table;
+            // Refresh the panels
+            refreshMainPanel();
+        });
     }
 
     public static void main(String[] args) {

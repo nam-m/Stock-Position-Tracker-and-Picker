@@ -18,22 +18,22 @@ import model.Stock;
 import model.StockPosition;
 
 public class ButtonEditor extends AbstractCellEditor implements TableCellEditor {
-    private JPanel panel = new JPanel();
-    private JButton buyButton;
-    private JButton sellButton;
+    private final JPanel panel;
+    private final JButton buyButton;
+    private final JButton sellButton;
+    private final JTable table;
+    private final Account account;
+    private final StockAppGUI gui;
 
-    private JTable table;
-    private Account account;
-
-    public ButtonEditor(JCheckBox checkBox, JTable table, Account account) {
+    public ButtonEditor(JCheckBox checkBox, JTable table, Account account, StockAppGUI gui) {
         this.table = table;
         this.account = account;
+        this.gui = gui;
 
-        panel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 0));
+        panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
         buyButton = new JButton("Buy");
         sellButton = new JButton("Sell");
 
-        // Add action listeners for buttons
         buyButton.addActionListener(e -> handleBuy());
         sellButton.addActionListener(e -> handleSell());
         
@@ -41,76 +41,100 @@ public class ButtonEditor extends AbstractCellEditor implements TableCellEditor 
         panel.add(sellButton);
     }
 
-    /**
-     * MODIFIES: this
-     * EFFECTS: buy stock if totalCost > account.getCashBalance
-     */
+    // EFFECTS: buy
     private void handleBuy() {
         int selectedRow = table.getSelectedRow();
         if (selectedRow != -1) {
             String symbol = (String) table.getValueAt(selectedRow, 0);
-            // Call buyStock method with the symbol (and quantity if applicable)
-            int quantity = 5;
-            Stock stock = StockRepository.getStockBySymbol(symbol);
-            BigDecimal totalCost = stock.getPrice().multiply(BigDecimal.valueOf(quantity));
-            if (totalCost.compareTo(account.getCashBalance()) > 0) {
-                JOptionPane.showMessageDialog(null, "Cannot buy stock with total value of $" + totalCost + "\n");
-            } else {
-                account.buyStock(symbol, quantity);
-                JOptionPane.showMessageDialog(null, "Bought " + quantity + " shares of " + symbol + "\n"
-                        + "Cash balance: " + account.getCashBalance());
+            String quantityStr = JOptionPane.showInputDialog(
+                null, 
+                "Enter quantity to buy:", 
+                "Buy Stock", 
+                JOptionPane.PLAIN_MESSAGE
+            );
+
+            try {
+                if (quantityStr != null) {
+                    int quantity = Integer.parseInt(quantityStr);
+                    if (quantity <= 0) {
+                        JOptionPane.showMessageDialog(null, "Please enter a positive quantity");
+                        return;
+                    }
+
+                    Stock stock = StockRepository.getStockBySymbol(symbol);
+                    BigDecimal totalCost = stock.getPrice().multiply(BigDecimal.valueOf(quantity));
+                    
+                    if (totalCost.compareTo(account.getCashBalance()) > 0) {
+                        JOptionPane.showMessageDialog(null, 
+                            "Insufficient funds. Total cost: $" + totalCost);
+                    } else {
+                        account.buyStock(symbol, quantity);
+                        gui.updateTables(); // Update both tables
+                        JOptionPane.showMessageDialog(null, 
+                            String.format("Bought %d shares of %s\nCash balance: $%.2f", 
+                                quantity, symbol, account.getCashBalance().doubleValue()));
+                    }
+                }
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(null, "Please enter a valid number");
             }
         }
-        fireEditingStopped(); // Stop editing after the action
+        fireEditingStopped();
     }
 
-    /**
-     * MODIFIES: this
-     * EFFECTS: sell stock if position with selected stock is found
-     */
     private void handleSell() {
         int selectedRow = table.getSelectedRow();
         if (selectedRow != -1) {
             String symbol = (String) table.getValueAt(selectedRow, 0);
-            int quantity = 2;
             StockPosition position = account.getPortfolio().getStockPosition(symbol);
+            
             if (position == null) {
-                JOptionPane.showMessageDialog(null, "Not found stock position for " + symbol);
-            } else {
-                // Call sellStock method with the symbol (and quantity if applicable)
-                account.sellStock(symbol, quantity);
-                JOptionPane.showMessageDialog(null, "Sold " + quantity + " shares of " + symbol + "\n"
-                        + "Cash balance: " + account.getCashBalance());
+                JOptionPane.showMessageDialog(null, 
+                    "You don't own any shares of " + symbol);
+                return;
+            }
+
+            String quantityStr = JOptionPane.showInputDialog(
+                null, 
+                "Enter quantity to sell (max " + position.getQuantity() + "):", 
+                "Sell Stock", 
+                JOptionPane.PLAIN_MESSAGE
+            );
+
+            try {
+                if (quantityStr != null) {
+                    int quantity = Integer.parseInt(quantityStr);
+                    if (quantity <= 0) {
+                        JOptionPane.showMessageDialog(null, "Please enter a positive quantity");
+                        return;
+                    }
+                    if (quantity > position.getQuantity()) {
+                        JOptionPane.showMessageDialog(null, 
+                            "You can't sell more shares than you own");
+                        return;
+                    }
+
+                    account.sellStock(symbol, quantity);
+                    gui.updateTables(); // Update both tables
+                    JOptionPane.showMessageDialog(null, 
+                        String.format("Sold %d shares of %s\nCash balance: $%.2f", 
+                            quantity, symbol, account.getCashBalance().doubleValue()));
+                }
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(null, "Please enter a valid number");
             }
         }
-        fireEditingStopped(); // Stop editing after the action
-    }
-
-    /**
-     * MODIFIES: this
-     * EFFECTS: Updates the row in the table for the given stock symbol
-     */
-    private void updateTableRow(int rowIndex, String symbol) {
-        StockPosition position = account.getPortfolio().getStockPosition(symbol);
-        if (position != null) {
-            int quantity = position.getQuantity();
-            BigDecimal totalValue = position.getStock().getPrice().multiply(BigDecimal.valueOf(quantity));
-            portfolioTable.setValueAt(quantity, rowIndex, 2); // Update quantity
-            // table.setValueAt(totalValue, rowIndex, 3); // Update total value
-        } else {
-            // If no position exists, clear the row
-            portfolioTable.setValueAt(0, rowIndex, 1);
-            portfolioTable.setValueAt(BigDecimal.ZERO, rowIndex, 2);
-        }
+        fireEditingStopped();
     }
 
     @Override
-    public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+    public Component getTableCellEditorComponent(JTable table, Object value, 
+            boolean isSelected, int row, int column) {
         return panel;
     }
 
     @Override
     public Object getCellEditorValue() {
-        return null; // No actual value needs to be returned
+        return null;
     }
 }
