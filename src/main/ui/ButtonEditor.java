@@ -2,6 +2,7 @@ package ui;
 
 import java.awt.Component;
 import java.awt.FlowLayout;
+import java.math.BigDecimal;
 
 import javax.swing.AbstractCellEditor;
 import javax.swing.JButton;
@@ -13,6 +14,7 @@ import javax.swing.table.TableCellEditor;
 
 import model.Account;
 import model.Stock;
+import model.StockPosition;
 
 public class ButtonEditor extends AbstractCellEditor implements TableCellEditor {
     private JPanel panel = new JPanel();
@@ -38,24 +40,48 @@ public class ButtonEditor extends AbstractCellEditor implements TableCellEditor 
         panel.add(sellButton);
     }
 
+    /**
+     * MODIFIES: this
+     * EFFECTS: buy stock if totalCost > account.getCashBalance
+     */
     private void handleBuy() {
         int selectedRow = table.getSelectedRow();
         if (selectedRow != -1) {
-            String stockSymbol = (String) table.getValueAt(selectedRow, 0);
+            String symbol = (String) table.getValueAt(selectedRow, 0);
             // Call buyStock method with the symbol (and quantity if applicable)
-            account.buyStock(stockSymbol, 1);
-            JOptionPane.showMessageDialog(null, "Buy action performed for " + stockSymbol);
+            int quantity = 5;
+            Stock stock = StockRepository.getStockBySymbol(symbol);
+            BigDecimal totalCost = stock.getPrice().multiply(BigDecimal.valueOf(quantity));
+            if (totalCost.compareTo(account.getCashBalance()) > 0) {
+                JOptionPane.showMessageDialog(null, "Cannot buy stock with total value of $" + totalCost + "\n");
+            } else {
+                account.buyStock(symbol, quantity);
+                JOptionPane.showMessageDialog(null, "Bought " + quantity + " shares of " + symbol + "\n"
+                        + "Cash balance: " + account.getCashBalance());
+            }
+            
         }
         fireEditingStopped(); // Stop editing after the action
     }
 
+    /**
+     * MODIFIES: this
+     * EFFECTS: sell stock if position with selected stock is found
+     */
     private void handleSell() {
         int selectedRow = table.getSelectedRow();
         if (selectedRow != -1) {
-            String stockSymbol = (String) table.getValueAt(selectedRow, 0);
-            // Call sellStock method with the symbol (and quantity if applicable)
-            account.sellStock(stockSymbol, 1);
-            JOptionPane.showMessageDialog(null, "Sell action performed for " + stockSymbol);
+            String symbol = (String) table.getValueAt(selectedRow, 0);
+            int quantity = 2;
+            StockPosition position = account.getPortfolio().getStockPosition(symbol);
+            if (position == null) {
+                JOptionPane.showMessageDialog(null, "Not found stock position for " + symbol);
+            } else {
+                // Call sellStock method with the symbol (and quantity if applicable)
+                account.sellStock(symbol, quantity);
+                JOptionPane.showMessageDialog(null, "Sold " + quantity + " shares of " + symbol + "\n"
+                        + "Cash balance: " + account.getCashBalance());
+            }
         }
         fireEditingStopped(); // Stop editing after the action
     }
