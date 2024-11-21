@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -14,6 +15,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.table.DefaultTableModel;
+
+import model.Stock;
 
 public class StockAppGUI {
     private final JFrame frame;
@@ -34,14 +37,14 @@ public class StockAppGUI {
         frame.add(mainPanel, BorderLayout.CENTER);
         
         // Default view
-        showPortfolioPanel(); 
+        showAccountPanel(); 
 
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);
     }
 
-    // Initialize sidebar with buttons
+    // EFFECTS: Initialize sidebar with buttons
     private JPanel initSidebar() {
         JPanel sidebar = new JPanel();
         sidebar.setLayout(new GridLayout(3, 1));
@@ -62,7 +65,7 @@ public class StockAppGUI {
         return sidebar;
     }
 
-     // Display Account panel
+     // EFFECTS: Display Account panel
     private void showAccountPanel() {
         mainPanel.removeAll();
         mainPanel.add(new JLabel("Account Information"), BorderLayout.NORTH);
@@ -75,57 +78,70 @@ public class StockAppGUI {
         refreshMainPanel();
     }
 
-    // Display Portfolio panel with a stock table
+    // EFFECTS: Display Portfolio panel with a stock table
     private void showPortfolioPanel() {
         mainPanel.removeAll();
         mainPanel.add(new JLabel("Portfolio"), BorderLayout.NORTH);
 
         // Initialize the stock table
-        stockTable = createStockTable(getStockData());
+        // stockTable = createStockTable(getAllStocksData());
         JScrollPane tableScrollPane = new JScrollPane(stockTable);
         mainPanel.add(tableScrollPane, BorderLayout.CENTER);
 
         refreshMainPanel();
     }
 
-    // Display Stocks panel
+    // EFFECTS: Display Stocks panel
     private void showStocksPanel() {
         mainPanel.removeAll();
-        mainPanel.add(new JLabel("Stocks Overview"), BorderLayout.NORTH);
+        mainPanel.add(new JLabel("S&P 500 Stocks"), BorderLayout.NORTH);
 
-        // Example text content for stocks
-        JTextArea stocksInfo = new JTextArea("Stock Information\nStock prices, trends, etc.");
-        stocksInfo.setEditable(false);
-        mainPanel.add(stocksInfo, BorderLayout.CENTER);
+        // Retrieve stock data from StockRepository
+        Object[][] stockData = getAllStocksData();
+
+        // Create stock table and add to panel
+        JTable stockTable = createStockTable(stockData);
+        JScrollPane tableScrollPane = new JScrollPane(stockTable);
+        mainPanel.add(tableScrollPane, BorderLayout.CENTER);
 
         refreshMainPanel();
     }
 
-    // Refresh main panel after updating content
+    // EFFECTS: Retrieve all stock data from StockRepository
+    private Object[][] getAllStocksData() {
+        Map<String, Stock> stocks = StockRepository.getAllStocks();
+        // Create three columns
+        Object[][] data = new Object[stocks.size()][3];
+        
+        // Get symbols as list and sort
+        List<String> symbols = new ArrayList<>(stocks.keySet());
+        symbols.sort(String::compareTo); 
+
+        int row = 0;
+        for (String symbol : symbols) {
+            Stock stock = stocks.get(symbol);
+            data[row][0] = stock.getSymbol();
+            data[row][1] = stock.getPrice();
+            row++; 
+        }
+        return data;
+    }
+
+
+    // EFFECTS: Refresh main panel after updating content
     private void refreshMainPanel() {
         mainPanel.revalidate();
         mainPanel.repaint();
     }
 
-    // Create stock table with columns: symbol, quantity, price, total value
+    // EFFECTS: Create stock table with columns: symbol, quantity, price, total value
     private JTable createStockTable(Object[][] data) {
-        String[] columns = {"Symbol", "Quantity", "Price", "Total Value"};
+        String[] columns = {"Symbol", "Price"};
         DefaultTableModel model = new DefaultTableModel(data, columns);
         return new JTable(model);
     }
 
-    // Sample stock data (can replace with real data retrieval from Account/Portfolio classes)
-    private Object[][] getStockData() {
-        // Example data - replace this with real portfolio data
-        List<Object[]> stockData = new ArrayList<>();
-        stockData.add(new Object[]{"AAPL", 10, "150.00", "1500.00"});
-        stockData.add(new Object[]{"GOOG", 5, "2000.00", "10000.00"});
-        stockData.add(new Object[]{"AMZN", 3, "3500.00", "10500.00"});
-
-        return stockData.toArray(new Object[0][0]);
-    }
-
     public static void main(String[] args) {
-        StockAppGUI gui = new StockAppGUI();
+        new StockAppGUI();
     }
 }

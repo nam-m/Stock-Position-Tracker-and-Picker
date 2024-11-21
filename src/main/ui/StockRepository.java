@@ -52,6 +52,13 @@ public class StockRepository {
     }
 
     /**
+     * EFFECTS: Returns all stocks in the repository as a map
+     */
+    public static Map<String, Stock> getAllStocks() {
+        return stockData;
+    }
+
+    /**
      * SPECIFIES: Get stock by symbol from stock repository
      */
     public static Stock getStockBySymbol(String symbol) {
