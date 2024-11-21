@@ -19,19 +19,24 @@ import javax.swing.table.DefaultTableModel;
 
 import model.Account;
 import model.Stock;
+import model.StockPosition;
 
 public class StockAppGUI {
     private final JFrame frame;
     private final JPanel sidebarPanel;
     private final JPanel mainPanel;
     private final JPanel stockPanel;
-    private JTable stockTable;
+    // private JTable stockTable;
+    // private JTable portfolioTable;
 
     private Account account;
 
     public StockAppGUI() {
         account = new Account("Henry", 10000);
         frame = new JFrame("Stock Picker");
+        // stockTable = createStockTable();
+        // portfolioTable = createPortfolioTable();
+
         frame.setSize(800, 600);
         frame.setLocationRelativeTo(null);
         frame.setLayout(new BorderLayout());
@@ -90,7 +95,8 @@ public class StockAppGUI {
     private void showPortfolioPanel() {
         mainPanel.removeAll();
         mainPanel.add(new JLabel("Portfolio"), BorderLayout.NORTH);
-        JScrollPane tableScrollPane = new JScrollPane(stockTable);
+        JTable portfolioTable = createPortfolioTable();
+        JScrollPane tableScrollPane = new JScrollPane(portfolioTable);
         mainPanel.add(tableScrollPane, BorderLayout.CENTER);
         refreshMainPanel();
     }
@@ -105,13 +111,8 @@ public class StockAppGUI {
 
     private void setupStockPanel() {
         stockPanel.setLayout(new BorderLayout());
-    
-        // Create and add the stock table
         JTable stockTable = createStockTable();
-        // StockTable table = new StockTable(account);
-        // JTable stockTable = table.createStockTable();
         JScrollPane scrollPane = new JScrollPane(stockTable);
-    
         stockPanel.add(scrollPane, BorderLayout.CENTER);
     }
     
@@ -137,6 +138,23 @@ public class StockAppGUI {
         return data;
     }
 
+    // EFFECTS: Retrieve all portfolio stock positions
+    private Object[][] getPortfolioStockData(Account account) {
+        int totalStockPositions = account.getPortfolio().getTotalStockPositions();
+        Object[][] data = new Object[totalStockPositions][5];
+
+        int row = 0;
+        for (StockPosition position : account.getPortfolio().getAllStockPositions().values()) {
+            Stock stock = position.getStock();
+            data[row][0] = stock.getSymbol();               // Symbol
+            data[row][1] = stock.getPrice();                // Current Price
+            data[row][2] = position.getQuantity();          // Quantity Owned
+            data[row][3] = position.getTotalCost();         // Total Cost
+            data[row][4] = null;                            // Placeholder for Actions column
+            row++;
+        }
+        return data;
+    }
 
     // EFFECTS: Refresh main panel after updating content
     private void refreshMainPanel() {
@@ -144,23 +162,44 @@ public class StockAppGUI {
         mainPanel.repaint();
     }
 
-    // EFFECTS: Create stock table with columns: symbol, quantity, price, total value
+    // EFFECTS: Create stock table with columns: symbol, price, actions
     private JTable createStockTable() {
         String[] columnNames = {"Symbol", "Price", "Actions"};
         Object[][] stockData = getAllStocksData();
-        DefaultTableModel model = new DefaultTableModel(stockData, columnNames) {
+        DefaultTableModel stockModel = new DefaultTableModel(stockData, columnNames) {
             @Override
             public boolean isCellEditable(int row, int column) {
                 // Only make the "Actions" column editable
                 return column == 2;
             }
         };
-        JTable table = new JTable(model);
+        JTable table = new JTable(stockModel);
         table.setRowHeight(30);
         // Add custom renderer and editor for the "Actions" column
         table.getColumn("Actions").setCellRenderer(new ButtonRenderer());
         // Editor requires a checkBox
         table.getColumn("Actions").setCellEditor(new ButtonEditor(new JCheckBox(), table, account)); 
+
+        return table;
+    }
+
+    // EFFECTS: create portfolio table with columns: symbol, quantity, price, total value
+    public JTable createPortfolioTable() {
+        String[] columnNames = {"Symbol", "Price", "Quantity", "Total Value", "Actions"};
+        Object[][] stockData = getPortfolioStockData(account);
+        DefaultTableModel portfolioModel = new DefaultTableModel(stockData, columnNames) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                // Only make the "Actions" column editable (Buy/Sell buttons)
+                return column == 4;
+            }
+        };
+
+        JTable table = new JTable(portfolioModel);
+        table.setRowHeight(30);
+        // Add custom renderer and editor for the "Actions" column
+        table.getColumn("Actions").setCellRenderer(new ButtonRenderer());
+        table.getColumn("Actions").setCellEditor(new ButtonEditor(new JCheckBox(), table, account));
 
         return table;
     }

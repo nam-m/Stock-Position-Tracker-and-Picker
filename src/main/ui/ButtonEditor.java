@@ -10,6 +10,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTable;
+import javax.swing.SwingUtilities;
 import javax.swing.table.TableCellEditor;
 
 import model.Account;
@@ -59,7 +60,6 @@ public class ButtonEditor extends AbstractCellEditor implements TableCellEditor 
                 JOptionPane.showMessageDialog(null, "Bought " + quantity + " shares of " + symbol + "\n"
                         + "Cash balance: " + account.getCashBalance());
             }
-            
         }
         fireEditingStopped(); // Stop editing after the action
     }
@@ -84,6 +84,24 @@ public class ButtonEditor extends AbstractCellEditor implements TableCellEditor 
             }
         }
         fireEditingStopped(); // Stop editing after the action
+    }
+
+    /**
+     * MODIFIES: this
+     * EFFECTS: Updates the row in the table for the given stock symbol
+     */
+    private void updateTableRow(int rowIndex, String symbol) {
+        StockPosition position = account.getPortfolio().getStockPosition(symbol);
+        if (position != null) {
+            int quantity = position.getQuantity();
+            BigDecimal totalValue = position.getStock().getPrice().multiply(BigDecimal.valueOf(quantity));
+            portfolioTable.setValueAt(quantity, rowIndex, 2); // Update quantity
+            // table.setValueAt(totalValue, rowIndex, 3); // Update total value
+        } else {
+            // If no position exists, clear the row
+            portfolioTable.setValueAt(0, rowIndex, 1);
+            portfolioTable.setValueAt(BigDecimal.ZERO, rowIndex, 2);
+        }
     }
 
     @Override
