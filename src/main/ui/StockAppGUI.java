@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -22,6 +23,7 @@ public class StockAppGUI {
     private final JFrame frame;
     private final JPanel sidebarPanel;
     private final JPanel mainPanel;
+    private final JPanel stockPanel;
     private JTable stockTable;
 
     public StockAppGUI() {
@@ -32,12 +34,14 @@ public class StockAppGUI {
 
         sidebarPanel = initSidebar();
         mainPanel = new JPanel(new BorderLayout());
+        stockPanel = new JPanel();
+        setupStockPanel();
 
         frame.add(sidebarPanel, BorderLayout.WEST);
         frame.add(mainPanel, BorderLayout.CENTER);
         
         // Default view
-        showAccountPanel(); 
+        showStocksPanel(); 
 
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
@@ -95,22 +99,29 @@ public class StockAppGUI {
     private void showStocksPanel() {
         mainPanel.removeAll();
         mainPanel.add(new JLabel("S&P 500 Stocks"), BorderLayout.NORTH);
-
-        // Retrieve stock data from StockRepository
-        Object[][] stockData = getAllStocksData();
+        mainPanel.add(stockPanel, BorderLayout.CENTER);
 
         // Create stock table and add to panel
-        JTable stockTable = createStockTable(stockData);
-        JScrollPane tableScrollPane = new JScrollPane(stockTable);
-        mainPanel.add(tableScrollPane, BorderLayout.CENTER);
-
+        // JTable stockTable = createStockTable();
+        // stockPanel.add(new JScrollPane(stockTable), BorderLayout.CENTER);
         refreshMainPanel();
     }
+
+    private void setupStockPanel() {
+        stockPanel.setLayout(new BorderLayout());
+    
+        // Create and add the stock table
+        JTable stockTable = createStockTable();
+        JScrollPane scrollPane = new JScrollPane(stockTable);
+    
+        stockPanel.add(scrollPane, BorderLayout.CENTER);
+    }
+    
 
     // EFFECTS: Retrieve all stock data from StockRepository
     private Object[][] getAllStocksData() {
         Map<String, Stock> stocks = StockRepository.getAllStocks();
-        // Create three columns
+        // Create columns for symbol and price
         Object[][] data = new Object[stocks.size()][3];
         
         // Get symbols as list and sort
@@ -122,6 +133,7 @@ public class StockAppGUI {
             Stock stock = stocks.get(symbol);
             data[row][0] = stock.getSymbol();
             data[row][1] = stock.getPrice();
+            data[row][2] = null;
             row++; 
         }
         return data;
@@ -135,13 +147,27 @@ public class StockAppGUI {
     }
 
     // EFFECTS: Create stock table with columns: symbol, quantity, price, total value
-    private JTable createStockTable(Object[][] data) {
-        String[] columns = {"Symbol", "Price"};
-        DefaultTableModel model = new DefaultTableModel(data, columns);
-        return new JTable(model);
+    private JTable createStockTable() {
+        String[] columnNames = {"Symbol", "Price", "Actions"};
+        Object[][] stockData = getAllStocksData();
+        DefaultTableModel model = new DefaultTableModel(stockData, columnNames) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                // Only make the "Actions" column editable
+                return column == 2;
+            }
+        };
+        JTable table = new JTable(model);
+        table.setRowHeight(30);
+        // Add custom renderer and editor for the "Actions" column
+        table.getColumn("Actions").setCellRenderer(new ButtonRenderer());
+        // Editor requires a checkBox
+        table.getColumn("Actions").setCellEditor(new ButtonEditor(new JCheckBox())); 
+
+        return table;
     }
 
     public static void main(String[] args) {
-        new StockAppGUI();
+        StockAppGUI gui = new StockAppGUI();
     }
 }
