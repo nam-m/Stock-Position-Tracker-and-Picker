@@ -22,8 +22,8 @@ public class ButtonRenderer extends JPanel implements TableCellRenderer {
 
     
     @Override
-    @SuppressWarnings("methodlength")
-    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+    public Component getTableCellRendererComponent(JTable table, Object value, 
+            boolean isSelected, boolean hasFocus, int row, int column) {
         if (isSelected) {
             setBackground(table.getSelectionBackground());
         } else {

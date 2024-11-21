@@ -42,7 +42,8 @@ public class StockAppGUI {
         frame.setLocationRelativeTo(null);
         frame.setLayout(new BorderLayout());
 
-        initializeTables();
+        initializeStockTable();
+        initializePortfolioTable();
 
         sidebarPanel = initSidebar();
         mainPanel = new JPanel(new BorderLayout());
@@ -60,8 +61,8 @@ public class StockAppGUI {
         frame.setVisible(true);
     }
 
-    private void initializeTables() {
-        // Initialize stock table
+    // EFFECTS: Initialize stock table with column names, row height and buy/sell buttons under Actions column
+    private void initializeStockTable() {
         String[] stockColumns = {"Symbol", "Price", "Actions"};
         Object[][] stockData = getAllStocksData();
         stockModel = new DefaultTableModel(stockData, stockColumns) {
@@ -75,8 +76,10 @@ public class StockAppGUI {
         stockTable.getColumn("Actions").setCellRenderer(new ButtonRenderer());
         stockTable.getColumn("Actions").setCellEditor(
             new ButtonEditor(new JCheckBox(), stockTable, account, this));
+    }
 
-        // Initialize portfolio table
+    // EFFECTS: Initialize portfolio table with column names, row height and buy/sell buttons under Actions column
+    private void initializePortfolioTable() {
         String[] portfolioColumns = {"Symbol", "Price", "Quantity", "Total Value", "Actions"};
         Object[][] portfolioData = getPortfolioStockData(account);
         portfolioModel = new DefaultTableModel(portfolioData, portfolioColumns) {
@@ -212,9 +215,5 @@ public class StockAppGUI {
             // Refresh the panels
             refreshMainPanel();
         });
-    }
-
-    public static void main(String[] args) {
-        StockAppGUI gui = new StockAppGUI();
     }
 }
