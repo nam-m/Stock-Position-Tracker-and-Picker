@@ -129,7 +129,7 @@ public class StockAppGUI {
         return sidebar;
     }
 
-     // EFFECTS: Display Account panel
+    // EFFECTS: Display Account panel
     private void showAccountPanel() {
         mainPanel.removeAll();
         // Create panel for form fields
@@ -149,7 +149,7 @@ public class StockAppGUI {
         balanceField.setText(account.getCashBalance().toString());
         formPanel.add(balanceField);
 
-            // Create button panel
+        // Create button panel
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 
         // Load button
@@ -172,15 +172,17 @@ public class StockAppGUI {
     private void saveAccountData() {
         try {
             saveAccount();  // Call your existing save method
-            JOptionPane.showMessageDialog(mainPanel,
-                "Saved account for " + account.getAccountName() + " to " + JSON_STORE,
-                "Save Successful",
-                JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(
+                    mainPanel,
+                    "Saved account for " + account.getAccountName() + " to " + JSON_STORE,
+                    "Save Successful",
+                    JOptionPane.INFORMATION_MESSAGE);
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(mainPanel,
-                "Unable to write to file: " + JSON_STORE,
-                "Save Error",
-                JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(
+                    mainPanel,
+                    "Unable to write to file: " + JSON_STORE,
+                    "Save Error",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -188,15 +190,17 @@ public class StockAppGUI {
     private void loadAccountData() {
         try {
             loadAccount();  // Call your existing save method
-            JOptionPane.showMessageDialog(mainPanel,
-                "Loaded account for " + account.getAccountName() + " from " + JSON_STORE,
-                "Load Successful",
-                JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(
+                    mainPanel,
+                    "Loaded account for " + account.getAccountName() + " from " + JSON_STORE,
+                    "Load Successful",
+                    JOptionPane.INFORMATION_MESSAGE);
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(mainPanel,
-                "Unable to load from file: " + JSON_STORE,
-                "Load Error",
-                JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(
+                    mainPanel,
+                    "Unable to load from file: " + JSON_STORE,
+                    "Load Error",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -275,8 +279,8 @@ public class StockAppGUI {
         Map<String, StockPosition> positions = account.getPortfolio().getAllStockPositions();
         // Only create rows for positions with quantity > 0
         List<StockPosition> activePositions = positions.values().stream()
-            .filter(position -> position.getQuantity() > 0)
-            .collect(Collectors.toList());
+                .filter(position -> position.getQuantity() > 0)
+                .collect(Collectors.toList());
         Object[][] data = new Object[activePositions.size()][5];
 
         int row = 0;
@@ -320,6 +324,11 @@ public class StockAppGUI {
                 String formattedBalance = String.format("$%,.2f", balance);
                 balanceField.setText(formattedBalance);
             }
+
+            // // Update pie chart if visible
+            // if (pieChartPanel != null) {
+            //     pieChartPanel.updateData(account);
+            // }
 
             // Refresh the panels
             refreshMainPanel();
