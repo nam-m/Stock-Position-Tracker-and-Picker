@@ -6,6 +6,7 @@ import java.awt.GridLayout;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -15,6 +16,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
@@ -31,6 +33,7 @@ public class StockAppGUI {
     private JTable portfolioTable;
     private DefaultTableModel portfolioModel;
     private DefaultTableModel stockModel;
+    private JTextField balanceField;
 
     private Account account;
 
@@ -45,7 +48,7 @@ public class StockAppGUI {
         initializeStockTable();
         initializePortfolioTable();
 
-        sidebarPanel = initSidebar();
+        sidebarPanel = initializeSidebar();
         mainPanel = new JPanel(new BorderLayout());
         stockPanel = new JPanel(new BorderLayout());
         
@@ -96,10 +99,10 @@ public class StockAppGUI {
     }
 
     // EFFECTS: Initialize sidebar with buttons
-    private JPanel initSidebar() {
+    private JPanel initializeSidebar() {
         JPanel sidebar = new JPanel();
         sidebar.setLayout(new GridLayout(3, 1));
-        sidebar.setPreferredSize(new Dimension(150, 0));
+        sidebar.setPreferredSize(new Dimension(100, 0));
 
         JButton accountButton = new JButton("Account");
         JButton portfolioButton = new JButton("Portfolio");
@@ -119,13 +122,24 @@ public class StockAppGUI {
      // EFFECTS: Display Account panel
     private void showAccountPanel() {
         mainPanel.removeAll();
-        mainPanel.add(new JLabel("Account Information"), BorderLayout.NORTH);
+        // Create panel for form fields
+        JPanel formPanel = new JPanel(new GridLayout(2, 2, 5, 5));
+        
+        // Account Name field
+        formPanel.add(new JLabel("Account Name: "));
+        JTextField nameField = new JTextField(20);
+        nameField.setEditable(false);
+        nameField.setText(account.getAccountName());
+        formPanel.add(nameField);
+        
+        // Balance field
+        formPanel.add(new JLabel("Cash Balance: "));
+        balanceField = new JTextField(20);
+        balanceField.setEditable(false);
+        balanceField.setText(account.getCashBalance().toString());
+        formPanel.add(balanceField);
 
-        // Account data display (for illustration)
-        JTextArea accountDetails = new JTextArea("Name: John Doe\nBalance: $10,000.00");
-        accountDetails.setEditable(false);
-        mainPanel.add(accountDetails, BorderLayout.CENTER);
-
+        mainPanel.add(formPanel, BorderLayout.CENTER);
         refreshMainPanel();
     }
 
@@ -177,17 +191,21 @@ public class StockAppGUI {
 
     // EFFECTS: Retrieve all portfolio stock positions
     private Object[][] getPortfolioStockData(Account account) {
-        int totalStockPositions = account.getPortfolio().getTotalStockPositions();
-        Object[][] data = new Object[totalStockPositions][5];
+        Map<String, StockPosition> positions = account.getPortfolio().getAllStockPositions();
+        // Only create rows for positions with quantity > 0
+        List<StockPosition> activePositions = positions.values().stream()
+            .filter(position -> position.getQuantity() > 0)
+            .collect(Collectors.toList());
+        Object[][] data = new Object[activePositions.size()][5];
 
         int row = 0;
-        for (StockPosition position : account.getPortfolio().getAllStockPositions().values()) {
+        for (StockPosition position : activePositions) {
             Stock stock = position.getStock();
-            data[row][0] = stock.getSymbol();               // Symbol
-            data[row][1] = stock.getPrice();                // Current Price
-            data[row][2] = position.getQuantity();          // Quantity Owned
-            data[row][3] = position.getTotalCost();         // Total Cost
-            data[row][4] = null;                            // Placeholder for Actions column
+            data[row][0] = stock.getSymbol();     
+            data[row][1] = stock.getPrice();
+            data[row][2] = position.getQuantity();
+            data[row][3] = position.getTotalCost();
+            data[row][4] = null;
             row++;
         }
         return data;
@@ -210,7 +228,11 @@ public class StockAppGUI {
             }
 
             // Update cash balance display if it exists
-            // updateCashBalance();
+            if (balanceField != null) {
+                double balance = account.getCashBalance().doubleValue(); // Assuming account has getCashBalance() method
+                String formattedBalance = String.format("$%,.2f", balance);
+                balanceField.setText(formattedBalance);
+            }
 
             // Refresh the panels
             refreshMainPanel();
