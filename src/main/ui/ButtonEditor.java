@@ -10,7 +10,6 @@ import javax.swing.JCheckBox;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTable;
-import javax.swing.SwingUtilities;
 import javax.swing.table.TableCellEditor;
 
 import model.Account;
@@ -41,17 +40,16 @@ public class ButtonEditor extends AbstractCellEditor implements TableCellEditor 
         panel.add(sellButton);
     }
 
-    // EFFECTS: buy
+    // EFFECTS: buy stock from input quantity dialog if quantity > 0 and totalCost <= getCashBalance
     private void handleBuy() {
         int selectedRow = table.getSelectedRow();
         if (selectedRow != -1) {
             String symbol = (String) table.getValueAt(selectedRow, 0);
             String quantityStr = JOptionPane.showInputDialog(
-                null, 
-                "Enter quantity to buy:", 
-                "Buy Stock", 
-                JOptionPane.PLAIN_MESSAGE
-            );
+                                    null, 
+                                    "Enter quantity to buy:", 
+                                    "Buy Stock", 
+                                    JOptionPane.PLAIN_MESSAGE);
 
             try {
                 if (quantityStr != null) {
@@ -65,13 +63,12 @@ public class ButtonEditor extends AbstractCellEditor implements TableCellEditor 
                     BigDecimal totalCost = stock.getPrice().multiply(BigDecimal.valueOf(quantity));
                     
                     if (totalCost.compareTo(account.getCashBalance()) > 0) {
-                        JOptionPane.showMessageDialog(null, 
-                            "Insufficient funds. Total cost: $" + totalCost);
+                        JOptionPane.showMessageDialog(null, "Insufficient funds. Total cost: $" + totalCost);
                     } else {
                         account.buyStock(symbol, quantity);
-                        gui.updateTables(); // Update both tables
+                        gui.update();
                         JOptionPane.showMessageDialog(null, 
-                            String.format("Bought %d shares of %s\nCash balance: $%.2f", 
+                                String.format("Bought %d shares of %s\nCash balance: $%.2f", 
                                 quantity, symbol, account.getCashBalance().doubleValue()));
                     }
                 }
@@ -82,6 +79,7 @@ public class ButtonEditor extends AbstractCellEditor implements TableCellEditor 
         fireEditingStopped();
     }
 
+    // EFFECTS: sell stock from input quantity dialog if stock position exists 0 < quantity <= position.getQuantity
     private void handleSell() {
         int selectedRow = table.getSelectedRow();
         if (selectedRow != -1) {
@@ -89,18 +87,15 @@ public class ButtonEditor extends AbstractCellEditor implements TableCellEditor 
             StockPosition position = account.getPortfolio().getStockPosition(symbol);
             
             if (position == null) {
-                JOptionPane.showMessageDialog(null, 
-                    "You don't own any shares of " + symbol);
+                JOptionPane.showMessageDialog(null, "You don't own any shares of " + symbol);
                 return;
             }
-
+            
             String quantityStr = JOptionPane.showInputDialog(
-                null, 
-                "Enter quantity to sell (max " + position.getQuantity() + "):", 
-                "Sell Stock", 
-                JOptionPane.PLAIN_MESSAGE
-            );
-
+                                    null, 
+                                    "Enter quantity to sell (max " + position.getQuantity() + "):",
+                                    "Sell Stock",
+                                    JOptionPane.PLAIN_MESSAGE);
             try {
                 if (quantityStr != null) {
                     int quantity = Integer.parseInt(quantityStr);
@@ -109,16 +104,15 @@ public class ButtonEditor extends AbstractCellEditor implements TableCellEditor 
                         return;
                     }
                     if (quantity > position.getQuantity()) {
-                        JOptionPane.showMessageDialog(null, 
-                            "You can't sell more shares than you own");
+                        JOptionPane.showMessageDialog(null, "You can't sell more shares than you own");
                         return;
                     }
 
                     account.sellStock(symbol, quantity);
-                    gui.updateTables(); // Update both tables
-                    JOptionPane.showMessageDialog(null, 
-                        String.format("Sold %d shares of %s\nCash balance: $%.2f", 
-                            quantity, symbol, account.getCashBalance().doubleValue()));
+                    gui.update();
+                    double balance = account.getCashBalance().doubleValue();
+                    String msg = String.format("Sold %d shares of %s\nCash balance: $%.2f", quantity, symbol, balance);
+                    JOptionPane.showMessageDialog(null, msg);
                 }
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(null, "Please enter a valid number");
