@@ -1,16 +1,24 @@
 package ui;
 
+import java.awt.BasicStroke;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
@@ -21,11 +29,14 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import javax.swing.border.Border;
 import javax.swing.table.DefaultTableModel;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.labels.PieSectionLabelGenerator;
+import org.jfree.chart.labels.StandardPieSectionLabelGenerator;
 import org.jfree.chart.plot.PiePlot;
 import org.jfree.data.general.DefaultPieDataset;
 
@@ -76,7 +87,7 @@ public class StockAppGUI {
         frame.add(mainPanel, BorderLayout.CENTER);
         
         // Default view
-        showStocksPanel(); 
+        showAccountPanel();
 
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
@@ -160,24 +171,39 @@ public class StockAppGUI {
         // Create chart panel
         chartPanel = createPieChart();
         chartPanel.setPreferredSize(new Dimension(300, 300));
-
-        // Create button panel
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+    
+        // Deposit button
+        JButton depositButton = new JButton("Deposit");
+        depositButton.addActionListener(e -> handleDeposit());
+        
+        // Withdraw button
+        JButton withdrawButton = new JButton("Withdraw");
+        withdrawButton.addActionListener(e -> handleWithdraw());
 
         // Load button
         JButton loadButton = new JButton("Load Data");
-        loadButton.addActionListener(e -> loadAccountData());
-        buttonPanel.add(loadButton);
+        loadButton.addActionListener(e -> handleLoadAccount());
 
         // Save button
         JButton saveButton = new JButton("Save Data");
-        saveButton.addActionListener(e -> saveAccountData());
-        buttonPanel.add(saveButton);
+        saveButton.addActionListener(e -> handleSaveAccount());
 
         // Create a panel for the form and chart
         JPanel centerPanel = new JPanel(new BorderLayout());
         centerPanel.add(formPanel, BorderLayout.NORTH);
         centerPanel.add(chartPanel, BorderLayout.CENTER);
+        // centerPanel.add(transactionPanel, BorderLayout.SOUTH);
+
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.LINE_AXIS));
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 10));
+        buttonPanel.add(depositButton);
+        buttonPanel.add(Box.createRigidArea(new Dimension(10, 0)));
+        buttonPanel.add(withdrawButton);
+        buttonPanel.add(Box.createHorizontalGlue());
+        buttonPanel.add(loadButton);
+        buttonPanel.add(Box.createRigidArea(new Dimension(10, 0)));
+        buttonPanel.add(saveButton);
 
         // Add panels to main panel
         mainPanel.add(centerPanel, BorderLayout.CENTER);
@@ -191,12 +217,19 @@ public class StockAppGUI {
         updateDataset(dataset);
         
         JFreeChart chart = ChartFactory.createPieChart(
-            "Investment Portfolio", // chart title
-            dataset,                       // data
-            true,                         // include legend
-            true,                         // tooltips
-            false                         // URLs
+                "Investment Portfolio", // chart title
+                dataset,                       // data
+                true,                         // include legend
+                true,                         // tooltips
+                false                         // URLs
         );
+        PiePlot plot = (PiePlot) chart.getPlot();
+        PieSectionLabelGenerator labelGenerator = new StandardPieSectionLabelGenerator(
+                "{0} : {2}", new DecimalFormat("0"), new DecimalFormat("0%"));  
+        plot.setLabelGenerator(labelGenerator);
+
+        // Add spacing between sections
+        plot.setSectionOutlinesVisible(true);
         
         // Customize the chart appearance
         chart.setBackgroundPaint(mainPanel.getBackground());
@@ -227,8 +260,98 @@ public class StockAppGUI {
         }
     }
 
+    // EFFECTS: Handles the deposit transaction
+    private void handleDeposit() {
+        String input = showTransactionDialog("Deposit", "Enter amount to deposit:");
+        if (input != null) {
+            try {
+                BigDecimal amount = new BigDecimal(input);
+                if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+                    showError("Please enter a positive amount.");
+                    return;
+                }
+                
+                account.deposit(amount.doubleValue());
+                updateBalanceDisplay();
+                updatePieChart();
+                showSuccess("Successfully deposited " + formatCurrency(amount));
+            } catch (NumberFormatException e) {
+                showError("Please enter a valid number.");
+            } catch (Exception e) {
+                showError("Error processing deposit: " + e.getMessage());
+            }
+        }
+    }
+
+    // EFFECTS: Handles the withdraw transaction
+    private void handleWithdraw() {
+        String input = showTransactionDialog("Withdraw", "Enter amount to withdraw:");
+        if (input != null) {
+            try {
+                BigDecimal amount = new BigDecimal(input);
+                if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+                    showError("Please enter a positive amount.");
+                    return;
+                }
+                
+                if (amount.compareTo(account.getCashBalance()) > 0) {
+                    showError("Insufficient funds.");
+                    return;
+                }
+                
+                account.withdraw(amount.doubleValue());
+                updateBalanceDisplay();
+                updatePieChart();
+                showSuccess("Successfully withdrew " + formatCurrency(amount));
+            } catch (NumberFormatException e) {
+                showError("Please enter a valid number.");
+            } catch (Exception e) {
+                showError("Error processing withdrawal: " + e.getMessage());
+            }
+        }
+    }
+
+    // EFFECTS: Shows a dialog for entering transaction amount
+    private String showTransactionDialog(String title, String message) {
+        JPanel panel = new JPanel();
+        panel.add(new JLabel(message));
+        JTextField textField = new JTextField(10);
+        panel.add(textField);
+
+        int result = JOptionPane.showConfirmDialog(mainPanel, panel, 
+                title, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+                
+        if (result == JOptionPane.OK_OPTION) {
+            return textField.getText().trim();
+        }
+        return null;
+    }
+
+    // EFFECTS: Shows an error message
+    private void showError(String message) {
+        JOptionPane.showMessageDialog(mainPanel, message, "Error", 
+                JOptionPane.ERROR_MESSAGE);
+    }
+
+    // EFFECTS: Shows a success message
+    private void showSuccess(String message) {
+        JOptionPane.showMessageDialog(mainPanel, message, "Success", 
+                JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    // EFFECTS: Updates the balance display
+    private void updateBalanceDisplay() {
+        balanceField.setText(formatCurrency(account.getCashBalance()));
+    }
+
+    // EFFECTS: Formats currency values
+    private String formatCurrency(BigDecimal amount) {
+        NumberFormat formatter = NumberFormat.getCurrencyInstance();
+        return formatter.format(amount);
+    }
+
     // EFFECTS: Save account and show dialogs on success/failure
-    private void saveAccountData() {
+    private void handleSaveAccount() {
         try {
             saveAccount();  // Call your existing save method
             JOptionPane.showMessageDialog(
@@ -246,7 +369,7 @@ public class StockAppGUI {
     }
 
     // EFFECTS: Load account and show dialogs on success/failure
-    private void loadAccountData() {
+    private void handleLoadAccount() {
         try {
             loadAccount();  // Call your existing save method
             JOptionPane.showMessageDialog(
