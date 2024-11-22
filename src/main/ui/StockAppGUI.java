@@ -63,6 +63,7 @@ public class StockAppGUI {
 
     private ChartPanel chartPanel;
 
+    // EFFECTS: Initialize account and create GUI application
     public StockAppGUI() {
         account = new Account("Henry", 10000);
         jsonWriter = new JsonWriter(JSON_STORE);
@@ -104,7 +105,7 @@ public class StockAppGUI {
         };
         stockTable = new JTable(stockModel);
         stockTable.setRowHeight(30);
-        stockTable.getColumn("Actions").setCellRenderer(new ButtonRenderer());
+        stockTable.getColumn("Actions").setCellRenderer(new BuySellButtonRenderer());
         stockTable.getColumn("Actions").setCellEditor(
             new BuySellButtonEditor(new JCheckBox(), stockTable, account, this));
     }
@@ -121,7 +122,7 @@ public class StockAppGUI {
         };
         portfolioTable = new JTable(portfolioModel);
         portfolioTable.setRowHeight(30);
-        portfolioTable.getColumn("Actions").setCellRenderer(new ButtonRenderer());
+        portfolioTable.getColumn("Actions").setCellRenderer(new BuySellButtonRenderer());
         portfolioTable.getColumn("Actions").setCellEditor(
             new BuySellButtonEditor(new JCheckBox(), portfolioTable, account, this));
     }
@@ -147,6 +148,7 @@ public class StockAppGUI {
         return sidebar;
     }
 
+    // EFFECTS: Display account panel
     private void showAccountPanel() {
         mainPanel.removeAll();
         // Create panel for form fields
@@ -536,20 +538,16 @@ public class StockAppGUI {
             for (Object[] row : newPortfolioData) {
                 portfolioModel.addRow(row);
             }
-
             // Update cash balance display if it exists
             if (balanceField != null) {
                 double balance = account.getCashBalance().doubleValue(); // Assuming account has getCashBalance() method
                 String formattedBalance = String.format("$%,.2f", balance);
                 balanceField.setText(formattedBalance);
             }
-    
             // Refresh the panels
             refreshMainPanel();
-
             // Update stock and portfolio table button editors
             updateButtonEditors();
-            
             // Update pie chart if visible
             updatePieChart();
         });

@@ -18,7 +18,7 @@ import model.StockPosition;
 import utils.MessageHandler;
 
 /** 
- * Buy and Sell buttons that handle buying/selling stocks
+ * Represent buy and sell buttons that handle buying/selling stocks
 */
 public class BuySellButtonEditor extends AbstractCellEditor implements TableCellEditor {
     private final JPanel panel;
@@ -28,7 +28,7 @@ public class BuySellButtonEditor extends AbstractCellEditor implements TableCell
     private final Account account;
     private final StockAppGUI gui;
 
-    // EFFECTS: initialize buy and sell buttons and add them to a panel
+    // EFFECTS: Initialize buy and sell buttons and add them to a panel
     public BuySellButtonEditor(JCheckBox checkBox, JTable table, Account account, StockAppGUI gui) {
         this.table = table;
         this.account = account;
@@ -45,7 +45,7 @@ public class BuySellButtonEditor extends AbstractCellEditor implements TableCell
         panel.add(sellButton);
     }
 
-    // EFFECTS: buy stock from input quantity dialog
+    // EFFECTS: Buy stock from input quantity dialog
     private void handleBuy() {
         int selectedRow = table.getSelectedRow();
         if (selectedRow == -1) {
@@ -70,7 +70,7 @@ public class BuySellButtonEditor extends AbstractCellEditor implements TableCell
         }
     }
 
-    // EFFECTS: sell stock from input quantity dialog
+    // EFFECTS: Sell stock from input quantity dialog
     private void handleSell() {
         if (table.getSelectedRow() == -1) {
             return;
