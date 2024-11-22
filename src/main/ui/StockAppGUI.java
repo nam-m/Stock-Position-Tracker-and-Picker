@@ -1,10 +1,7 @@
 package ui;
 
-import java.awt.BasicStroke;
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -29,7 +26,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
-import javax.swing.border.Border;
 import javax.swing.table.DefaultTableModel;
 
 import org.jfree.chart.ChartFactory;
@@ -46,6 +42,9 @@ import model.StockPosition;
 import persistence.JsonReader;
 import persistence.JsonWriter;
 
+/** 
+ * GUI for Stock App
+*/
 public class StockAppGUI {
     private static final String JSON_STORE = "./data/account.json";
     private final JFrame frame;
@@ -107,7 +106,7 @@ public class StockAppGUI {
         stockTable.setRowHeight(30);
         stockTable.getColumn("Actions").setCellRenderer(new ButtonRenderer());
         stockTable.getColumn("Actions").setCellEditor(
-            new ButtonEditor(new JCheckBox(), stockTable, account, this));
+            new BuySellButtonEditor(new JCheckBox(), stockTable, account, this));
     }
 
     // EFFECTS: Initialize portfolio table with column names, row height and buy/sell buttons under Actions column
@@ -124,7 +123,7 @@ public class StockAppGUI {
         portfolioTable.setRowHeight(30);
         portfolioTable.getColumn("Actions").setCellRenderer(new ButtonRenderer());
         portfolioTable.getColumn("Actions").setCellEditor(
-            new ButtonEditor(new JCheckBox(), portfolioTable, account, this));
+            new BuySellButtonEditor(new JCheckBox(), portfolioTable, account, this));
     }
 
     // EFFECTS: Initialize sidebar with buttons
@@ -148,19 +147,63 @@ public class StockAppGUI {
         return sidebar;
     }
 
-    // EFFECTS: Display Account panel
     private void showAccountPanel() {
         mainPanel.removeAll();
         // Create panel for form fields
-        JPanel formPanel = new JPanel(new GridLayout(2, 2, 5, 5));
+        JPanel formPanel = createFormPanel();
+
+        // Create chart panel
+        chartPanel = createPieChart();
+        chartPanel.setPreferredSize(new Dimension(300, 300));
+
+        // Create a panel for the form and chart
+        JPanel centerPanel = new JPanel(new BorderLayout());
+        centerPanel.add(formPanel, BorderLayout.NORTH);
+        centerPanel.add(chartPanel, BorderLayout.CENTER);
+
+        JPanel buttonPanel = createButtonPanel();
+
+        // Add panels to main panel
+        mainPanel.add(centerPanel, BorderLayout.CENTER);
+        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+        refreshMainPanel();
+    }
+
+    // EFFECTS: Display Account panel
+    // private void showAccountPanel() {
+    //     mainPanel.removeAll();
+
+    //     JPanel centerPanel = createCenterPanel();
+    //     JPanel buttonPanel = createButtonPanel();
+
+    //     mainPanel.add(centerPanel, BorderLayout.CENTER);
+    //     mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+    //     refreshMainPanel();
+    // }
+
+    // EFFECTS: Creates the center panel with the form and chart
+    // private JPanel createCenterPanel() {
+    //     JPanel formPanel = createFormPanel();
+    //     JPanel chartPanel = createChartPanel();
+
+    //     JPanel centerPanel = new JPanel(new BorderLayout());
+    //     centerPanel.add(formPanel, BorderLayout.NORTH);
+    //     centerPanel.add(chartPanel, BorderLayout.CENTER);
         
+    //     return centerPanel;
+    // }
+
+    // EFFECTS: Creates the form panel for account name and balance
+    private JPanel createFormPanel() {
+        JPanel formPanel = new JPanel(new GridLayout(2, 2, 5, 5));
+
         // Account Name field
         formPanel.add(new JLabel("Account Name: "));
         JTextField nameField = new JTextField(20);
         nameField.setEditable(false);
         nameField.setText(account.getAccountName());
         formPanel.add(nameField);
-        
+
         // Balance field
         formPanel.add(new JLabel("Cash Balance: "));
         balanceField = new JTextField(20);
@@ -168,31 +211,29 @@ public class StockAppGUI {
         balanceField.setText(account.getCashBalance().toString());
         formPanel.add(balanceField);
 
-        // Create chart panel
-        chartPanel = createPieChart();
-        chartPanel.setPreferredSize(new Dimension(300, 300));
-    
-        // Deposit button
+        return formPanel;
+    }
+
+    // EFFECTS: Creates the chart panel for displaying portfolio distribution
+    // private JPanel createChartPanel() {
+    //     JPanel chartPanel = createPieChart();
+    //     chartPanel.setPreferredSize(new Dimension(300, 300));
+    //     return chartPanel;
+    // }
+
+    // EFFECTS: Creates the button panel with deposit, withdraw, load, and save buttons
+    private JPanel createButtonPanel() {
         JButton depositButton = new JButton("Deposit");
         depositButton.addActionListener(e -> handleDeposit());
-        
-        // Withdraw button
+
         JButton withdrawButton = new JButton("Withdraw");
         withdrawButton.addActionListener(e -> handleWithdraw());
 
-        // Load button
         JButton loadButton = new JButton("Load Data");
         loadButton.addActionListener(e -> handleLoadAccount());
 
-        // Save button
         JButton saveButton = new JButton("Save Data");
         saveButton.addActionListener(e -> handleSaveAccount());
-
-        // Create a panel for the form and chart
-        JPanel centerPanel = new JPanel(new BorderLayout());
-        centerPanel.add(formPanel, BorderLayout.NORTH);
-        centerPanel.add(chartPanel, BorderLayout.CENTER);
-        // centerPanel.add(transactionPanel, BorderLayout.SOUTH);
 
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.LINE_AXIS));
@@ -205,10 +246,7 @@ public class StockAppGUI {
         buttonPanel.add(Box.createRigidArea(new Dimension(10, 0)));
         buttonPanel.add(saveButton);
 
-        // Add panels to main panel
-        mainPanel.add(centerPanel, BorderLayout.CENTER);
-        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
-        refreshMainPanel();
+        return buttonPanel;
     }
 
     // EFFECTS: Creates and initializes the pie chart
@@ -505,24 +543,24 @@ public class StockAppGUI {
                 String formattedBalance = String.format("$%,.2f", balance);
                 balanceField.setText(formattedBalance);
             }
+    
+            // Refresh the panels
+            refreshMainPanel();
 
             // Update stock and portfolio table button editors
             updateButtonEditors();
-
+            
             // Update pie chart if visible
             updatePieChart();
-
-            // Refresh the panels
-            refreshMainPanel();
         });
     }
     
     // EFFECTS: Update stock and portfolio table button editors
     private void updateButtonEditors() {        
         portfolioTable.getColumn("Actions").setCellEditor(
-            new ButtonEditor(new JCheckBox(), portfolioTable, account, this));
+            new BuySellButtonEditor(new JCheckBox(), portfolioTable, account, this));
 
         stockTable.getColumn("Actions").setCellEditor(
-            new ButtonEditor(new JCheckBox(), stockTable, account, this));
+            new BuySellButtonEditor(new JCheckBox(), stockTable, account, this));
     }
 }

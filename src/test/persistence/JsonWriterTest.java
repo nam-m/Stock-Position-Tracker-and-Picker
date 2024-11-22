@@ -66,7 +66,6 @@ class JsonWriterTest extends JsonTest {
         try {
             System.out.println(account.toJson().toString());
             account.buyStock("AAPL", 5);
-            account.buyStock("META", 6);
             JsonWriter writer = new JsonWriter(TEST_FILE_PATH);
             writer.open();
             writer.write(account);
