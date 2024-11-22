@@ -2,7 +2,10 @@ package ui;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.GridLayout;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -12,10 +15,10 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
@@ -23,8 +26,11 @@ import javax.swing.table.DefaultTableModel;
 import model.Account;
 import model.Stock;
 import model.StockPosition;
+import persistence.JsonReader;
+import persistence.JsonWriter;
 
 public class StockAppGUI {
+    private static final String JSON_STORE = "./data/account.json";
     private final JFrame frame;
     private final JPanel sidebarPanel;
     private final JPanel mainPanel;
@@ -36,9 +42,13 @@ public class StockAppGUI {
     private JTextField balanceField;
 
     private Account account;
+    private JsonWriter jsonWriter;
+    private JsonReader jsonReader;
 
     public StockAppGUI() {
         account = new Account("Henry", 10000);
+        jsonWriter = new JsonWriter(JSON_STORE);
+        jsonReader = new JsonReader(JSON_STORE);
         frame = new JFrame("Stock Picker");
 
         frame.setSize(1024, 768);
@@ -139,8 +149,48 @@ public class StockAppGUI {
         balanceField.setText(account.getCashBalance().toString());
         formPanel.add(balanceField);
 
+            // Create button panel
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+
+        // Load button
+        JButton loadButton = new JButton("Load Data");
+        loadButton.addActionListener(e -> loadAccountData());
+        buttonPanel.add(loadButton);
+
+        // Save button
+        JButton saveButton = new JButton("Save Data");
+        saveButton.addActionListener(e -> saveAccountData());
+        buttonPanel.add(saveButton);
+
+        // Add panels to main panel
         mainPanel.add(formPanel, BorderLayout.CENTER);
+        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
         refreshMainPanel();
+    }
+
+    private void saveAccountData() {
+        try {
+            saveAccount();  // Call your existing save method
+            JOptionPane.showMessageDialog(mainPanel,
+                "Saved account for " + account.getAccountName() + " to " + JSON_STORE,
+                "Save Successful",
+                JOptionPane.INFORMATION_MESSAGE);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(mainPanel,
+                "Unable to write to file: " + JSON_STORE,
+                "Save Error",
+                JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void saveAccount() {
+        try {
+            jsonWriter.open();
+            jsonWriter.write(account);
+            jsonWriter.close();
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     // EFFECTS: Display Portfolio panel with a stock table
@@ -217,8 +267,8 @@ public class StockAppGUI {
         mainPanel.repaint();
     }
 
-    // Method to update both tables after transactions
-    public void updateTables() {
+    // SPECIFIES Method to update both tables after transactions
+    public void update() {
         SwingUtilities.invokeLater(() -> {
             // Update portfolio table
             portfolioModel.setRowCount(0);
