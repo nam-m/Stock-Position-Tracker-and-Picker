@@ -23,6 +23,12 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PiePlot;
+import org.jfree.data.general.DefaultPieDataset;
+
 import model.Account;
 import model.Stock;
 import model.StockPosition;
@@ -44,6 +50,8 @@ public class StockAppGUI {
     private Account account;
     private JsonWriter jsonWriter;
     private JsonReader jsonReader;
+
+    private ChartPanel chartPanel;
 
     public StockAppGUI() {
         account = new Account("Henry", 10000);
@@ -149,6 +157,10 @@ public class StockAppGUI {
         balanceField.setText(account.getCashBalance().toString());
         formPanel.add(balanceField);
 
+        // Create chart panel
+        chartPanel = createPieChart();
+        chartPanel.setPreferredSize(new Dimension(300, 300));
+
         // Create button panel
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 
@@ -162,10 +174,57 @@ public class StockAppGUI {
         saveButton.addActionListener(e -> saveAccountData());
         buttonPanel.add(saveButton);
 
+        // Create a panel for the form and chart
+        JPanel centerPanel = new JPanel(new BorderLayout());
+        centerPanel.add(formPanel, BorderLayout.NORTH);
+        centerPanel.add(chartPanel, BorderLayout.CENTER);
+
         // Add panels to main panel
-        mainPanel.add(formPanel, BorderLayout.CENTER);
+        mainPanel.add(centerPanel, BorderLayout.CENTER);
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
         refreshMainPanel();
+    }
+
+    // EFFECTS: Creates and initializes the pie chart
+    private ChartPanel createPieChart() {
+        DefaultPieDataset dataset = new DefaultPieDataset();
+        updateDataset(dataset);
+        
+        JFreeChart chart = ChartFactory.createPieChart(
+            "Investment Portfolio", // chart title
+            dataset,                       // data
+            true,                         // include legend
+            true,                         // tooltips
+            false                         // URLs
+        );
+        
+        // Customize the chart appearance
+        chart.setBackgroundPaint(mainPanel.getBackground());
+        
+        return new ChartPanel(chart);
+    }
+
+    // EFFECTS: Updates the pie chart with current account data
+    private void updatePieChart() {
+        if (chartPanel != null) {
+            JFreeChart chart = chartPanel.getChart();
+            PiePlot plot = (PiePlot) chart.getPlot();
+            DefaultPieDataset dataset = (DefaultPieDataset) plot.getDataset();
+            updateDataset(dataset);
+        }
+    }
+
+    // EFFECTS: Updates the dataset with current account information
+    private void updateDataset(DefaultPieDataset dataset) {
+        dataset.clear();
+        
+        // Add data to the dataset
+        double cashBalance = account.getCashBalance().doubleValue();
+        dataset.setValue("Cash", cashBalance);
+        Map<String, StockPosition> positions = account.getPortfolio().getAllStockPositions();
+        for (String symbol : positions.keySet()) {
+            dataset.setValue(symbol, positions.get(symbol).getTotalCost());
+        }
     }
 
     // EFFECTS: Save account and show dialogs on success/failure
@@ -220,7 +279,6 @@ public class StockAppGUI {
         try {
             Account loadedAccount = jsonReader.read();
             this.account = loadedAccount;
-            updateButtonEditors();
             update();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -325,10 +383,11 @@ public class StockAppGUI {
                 balanceField.setText(formattedBalance);
             }
 
-            // // Update pie chart if visible
-            // if (pieChartPanel != null) {
-            //     pieChartPanel.updateData(account);
-            // }
+            // Update stock and portfolio table button editors
+            updateButtonEditors();
+
+            // Update pie chart if visible
+            updatePieChart();
 
             // Refresh the panels
             refreshMainPanel();
