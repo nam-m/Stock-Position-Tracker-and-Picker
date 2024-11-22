@@ -168,6 +168,7 @@ public class StockAppGUI {
         refreshMainPanel();
     }
 
+    // EFFECTS: Save account and show dialogs on success/failure
     private void saveAccountData() {
         try {
             saveAccount();  // Call your existing save method
@@ -183,6 +184,23 @@ public class StockAppGUI {
         }
     }
 
+    // EFFECTS: Load account and show dialogs on success/failure
+    private void loadAccountData() {
+        try {
+            loadAccount();  // Call your existing save method
+            JOptionPane.showMessageDialog(mainPanel,
+                "Loaded account for " + account.getAccountName() + " from " + JSON_STORE,
+                "Load Successful",
+                JOptionPane.INFORMATION_MESSAGE);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(mainPanel,
+                "Unable to load from file: " + JSON_STORE,
+                "Load Error",
+                JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    // EFFECTS: Save account data to json
     private void saveAccount() {
         try {
             jsonWriter.open();
@@ -193,7 +211,19 @@ public class StockAppGUI {
         }
     }
 
-    // EFFECTS: Display Portfolio panel with a stock table
+    // EFFECTS: Load account from json
+    private void loadAccount() {
+        try {
+            Account loadedAccount = jsonReader.read();
+            this.account = loadedAccount;
+            updateButtonEditors();
+            update();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    // EFFECTS: Display portfolio panel with a stock table
     private void showPortfolioPanel() {
         mainPanel.removeAll();
         mainPanel.add(new JLabel("Portfolio"), BorderLayout.NORTH);
@@ -203,7 +233,7 @@ public class StockAppGUI {
         refreshMainPanel();
     }
 
-    // EFFECTS: Display Stocks panel
+    // EFFECTS: Display stock panel
     private void showStocksPanel() {
         mainPanel.removeAll();
         mainPanel.add(new JLabel("S&P 500 Stocks"), BorderLayout.NORTH);
@@ -211,6 +241,7 @@ public class StockAppGUI {
         refreshMainPanel();
     }
 
+    // EFFECTS: Set up stock panel
     private void setupStockPanel() {
         stockPanel.setLayout(new BorderLayout());
         JScrollPane scrollPane = new JScrollPane(stockTable);
@@ -270,6 +301,12 @@ public class StockAppGUI {
     // SPECIFIES Method to update both tables after transactions
     public void update() {
         SwingUtilities.invokeLater(() -> {
+            // Update stock table
+            stockModel.setRowCount(0);
+            Object[][] newStockData = getAllStocksData();
+            for (Object[] row : newStockData) {
+                stockModel.addRow(row);
+            }
             // Update portfolio table
             portfolioModel.setRowCount(0);
             Object[][] newPortfolioData = getPortfolioStockData(account);
@@ -287,5 +324,14 @@ public class StockAppGUI {
             // Refresh the panels
             refreshMainPanel();
         });
+    }
+    
+    // EFFECTS: Update stock and portfolio table button editors
+    private void updateButtonEditors() {        
+        portfolioTable.getColumn("Actions").setCellEditor(
+            new ButtonEditor(new JCheckBox(), portfolioTable, account, this));
+
+        stockTable.getColumn("Actions").setCellEditor(
+            new ButtonEditor(new JCheckBox(), stockTable, account, this));
     }
 }
