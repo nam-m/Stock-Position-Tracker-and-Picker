@@ -25,3 +25,13 @@ This app provides me with an opportunity to explore financial data processing an
 - As a user, I want to see a summary of my portfolio's overall performance, including metrics like total value, total profit/loss, and percentage change
 - As a user, I want to save my entire portfolio to file
 - As a user, I want to load my entire portfolio from file
+
+## Intructions for End User
+
+- You can generate the first required action related to the user story "adding multiple stocks to portfolio" by selecting Buy button on specific's stock row on Stocks panel or Portfolio panel.
+- You can generate the second required action related to the user story "removing multiple stocks from portfolio" by selecting Sell button on specific's stock row on Stocks panel or Portfolio panel.
+- You can deposit cash by selecting Deposit button on Account panel.
+- You can withdraw cash by selecting Withdraw button on Acccount panel.
+- You can locate my visual component (cash and stock distribution pie chart) by navigating to Account panel.
+- You can save the state of my application by selecting Save button on Account panel.
+- You can reload the state of my application by selecting Load button on Account panel.
