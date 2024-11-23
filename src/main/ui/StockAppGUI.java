@@ -28,6 +28,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
+
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -74,14 +75,13 @@ public class StockAppGUI {
         frame.setLocationRelativeTo(null);
         frame.setLayout(new BorderLayout());
 
-        initializeStockTable();
-        initializePortfolioTable();
-
         sidebarPanel = initializeSidebar();
         mainPanel = new JPanel(new BorderLayout());
         stockPanel = new JPanel(new BorderLayout());
-        
+
+        initializeStockTable();
         setupStockPanel();
+        initializePortfolioTable();
 
         frame.add(sidebarPanel, BorderLayout.WEST);
         frame.add(mainPanel, BorderLayout.CENTER);
@@ -452,7 +452,6 @@ public class StockAppGUI {
     private void showPortfolioPanel() {
         mainPanel.removeAll();
         mainPanel.add(new JLabel("Portfolio"), BorderLayout.NORTH);
-        // JTable portfolioTable = createPortfolioTable();
         JScrollPane tableScrollPane = new JScrollPane(portfolioTable);
         mainPanel.add(tableScrollPane, BorderLayout.CENTER);
         refreshMainPanel();
