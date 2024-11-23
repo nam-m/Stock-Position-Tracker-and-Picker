@@ -57,10 +57,8 @@ public class BuySellButtonEditor extends AbstractCellEditor implements TableCell
                                 "Enter quantity to buy:", 
                                 "Buy Stock", 
                                 JOptionPane.PLAIN_MESSAGE);
-
         try {
-            int quantity = Integer.parseInt(quantityStr);
-            if (validateAndPurchaseStock(symbol, quantity)) {
+            if (validateAndPurchaseStock(symbol, quantityStr)) {
                 gui.update();
             }
         } catch (NumberFormatException e) {
@@ -86,8 +84,7 @@ public class BuySellButtonEditor extends AbstractCellEditor implements TableCell
                                 "Sell Stock",
                                 JOptionPane.PLAIN_MESSAGE);
         try {
-            int quantity = Integer.parseInt(quantityStr);
-            if (validateAndSellStock(symbol, quantity, position)) {
+            if (validateAndSellStock(symbol, quantityStr, position)) {
                 gui.update();
             }
         } catch (NumberFormatException ex) {
@@ -99,8 +96,12 @@ public class BuySellButtonEditor extends AbstractCellEditor implements TableCell
 
     // REQUIRES: symbol represents a valid stock
     // EFFECTS: Buy stock and return true if quantity is validated, false otherwise
-    private boolean validateAndPurchaseStock(String symbol, int quantity) {
-        try {
+    private boolean validateAndPurchaseStock(String symbol, String quantityStr) {
+        if (quantityStr == null) {
+            return false;
+        }
+        try {    
+            int quantity = Integer.parseInt(quantityStr);
             if (quantity <= 0) {
                 MessageHandler.showErrorMessage("Please enter a positive quantity");
                 return false;
@@ -122,8 +123,12 @@ public class BuySellButtonEditor extends AbstractCellEditor implements TableCell
 
     // REQUIRES: symbol represents a valid stock
     // EFFECTS: Sell stock and return true if quantity is validated, false otherwise
-    private boolean validateAndSellStock(String symbol, int quantity, StockPosition position) {
-        try {
+    private boolean validateAndSellStock(String symbol, String quantityStr, StockPosition position) {
+        if (quantityStr == null) {
+            return false;
+        }
+        try {    
+            int quantity = Integer.parseInt(quantityStr);
             if (quantity <= 0) {
                 MessageHandler.showErrorMessage("Please enter a positive quantity");
                 return false;
