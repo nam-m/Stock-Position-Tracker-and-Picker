@@ -26,13 +26,11 @@ public class BuySellButtonEditor extends AbstractCellEditor implements TableCell
     private final JButton sellButton;
     private final JTable table;
     private final Account account;
-    private final StockAppGUI gui;
 
     // EFFECTS: Initialize buy and sell buttons and add them to a panel
-    public BuySellButtonEditor(JCheckBox checkBox, JTable table, Account account, StockAppGUI gui) {
+    public BuySellButtonEditor(JCheckBox checkBox, JTable table, Account account) {
         this.table = table;
         this.account = account;
-        this.gui = gui;
 
         panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
         buyButton = new JButton("Buy");
@@ -58,9 +56,7 @@ public class BuySellButtonEditor extends AbstractCellEditor implements TableCell
                                 "Buy Stock", 
                                 JOptionPane.PLAIN_MESSAGE);
         try {
-            if (validateAndPurchaseStock(symbol, quantityStr)) {
-                gui.update();
-            }
+            validateAndPurchaseStock(symbol, quantityStr);
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(null, "Please enter a valid number");
         } finally {
@@ -84,9 +80,7 @@ public class BuySellButtonEditor extends AbstractCellEditor implements TableCell
                                 "Sell Stock",
                                 JOptionPane.PLAIN_MESSAGE);
         try {
-            if (validateAndSellStock(symbol, quantityStr, position)) {
-                gui.update();
-            }
+            validateAndSellStock(symbol, quantityStr, position);
         } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(null, "Please enter a valid number");
         } finally {
