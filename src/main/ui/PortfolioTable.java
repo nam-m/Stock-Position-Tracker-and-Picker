@@ -31,16 +31,9 @@ public class PortfolioTable implements Observer {
             }
         };
         portfolioTable = new JTable(portfolioModel);
-        portfolioTable.setRowHeight(30);
-        data = getPortfolioStockData(account);
-        portfolioModel.setRowCount(0);
-        
-        for (Object[] row : data) {
-            portfolioModel.addRow(row);
-        }       
+        portfolioTable.setRowHeight(30);     
         portfolioTable.getColumn("Actions").setCellRenderer(new BuySellButtonRenderer());
-        portfolioTable.getColumn("Actions").setCellEditor(
-            new BuySellButtonEditor(new JCheckBox(), portfolioTable, account));
+        updateTableData(account);
     }
 
     // EFFECTS: Update table data based on event
@@ -54,10 +47,10 @@ public class PortfolioTable implements Observer {
     // EFFECTS: Update table data with portfolio from account
     public void updateTableData(Account account) {
         SwingUtilities.invokeLater(() -> {
-            Object[][] newData = getPortfolioStockData(account);
+            data = getPortfolioStockData(account);
             portfolioModel.setRowCount(0);
             
-            for (Object[] row : newData) {
+            for (Object[] row : data) {
                 portfolioModel.addRow(row);
             }
             // Reinitialize buy and sell buttons to attach to new Account instance
