@@ -38,8 +38,11 @@ import org.jfree.chart.plot.PiePlot;
 import org.jfree.data.general.DefaultPieDataset;
 
 import model.Account;
+import model.EventType;
+import model.PortfolioTable;
 import model.Stock;
 import model.StockPosition;
+import model.StockTable;
 import persistence.JsonReader;
 import persistence.JsonWriter;
 
@@ -51,22 +54,31 @@ public class StockAppGUI {
     private final JFrame frame;
     private final JPanel sidebarPanel;
     private final JPanel mainPanel;
-    private final JPanel stockPanel;
     private JTable stockTable;
     private JTable portfolioTable;
     private DefaultTableModel portfolioModel;
     private DefaultTableModel stockModel;
     private JTextField balanceField;
 
-    private Account account;
+    // private Account account;
     private JsonWriter jsonWriter;
     private JsonReader jsonReader;
 
     private ChartPanel chartPanel;
 
+    private PortfolioTable portfolioTableComponent;
+    private StockTable stockTableComponent;
+    private Account account;
+
     // EFFECTS: Initialize account and create GUI application
     public StockAppGUI() {
+        // account = new Account("Henry", 10000);
         account = new Account("Henry", 10000);
+        initializePortfolioTable();
+        initializeStockTable();
+        account.addObserver(portfolioTableComponent);
+        account.addObserver(stockTableComponent);
+
         jsonWriter = new JsonWriter(JSON_STORE);
         jsonReader = new JsonReader(JSON_STORE);
         frame = new JFrame("Stock Picker");
@@ -77,11 +89,6 @@ public class StockAppGUI {
 
         sidebarPanel = initializeSidebar();
         mainPanel = new JPanel(new BorderLayout());
-        stockPanel = new JPanel(new BorderLayout());
-
-        initializeStockTable();
-        setupStockPanel();
-        initializePortfolioTable();
 
         frame.add(sidebarPanel, BorderLayout.WEST);
         frame.add(mainPanel, BorderLayout.CENTER);
@@ -95,36 +102,16 @@ public class StockAppGUI {
 
     // EFFECTS: Initialize stock table with column names, row height and buy/sell buttons under Actions column
     private void initializeStockTable() {
-        String[] stockColumns = {"Symbol", "Price", "Actions"};
-        Object[][] stockData = getAllStocksData();
-        stockModel = new DefaultTableModel(stockData, stockColumns) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return column == 2;
-            }
-        };
-        stockTable = new JTable(stockModel);
-        stockTable.setRowHeight(30);
-        stockTable.getColumn("Actions").setCellRenderer(new BuySellButtonRenderer());
-        stockTable.getColumn("Actions").setCellEditor(
-            new BuySellButtonEditor(new JCheckBox(), stockTable, account, this));
+        stockTableComponent = new StockTable();
+        stockTable = stockTableComponent.getTable();
+        stockTableComponent.setAccount(account);
     }
 
     // EFFECTS: Initialize portfolio table with column names, row height and buy/sell buttons under Actions column
     private void initializePortfolioTable() {
-        String[] portfolioColumns = {"Symbol", "Price", "Quantity", "Total Value", "Actions"};
-        Object[][] portfolioData = getPortfolioStockData(account);
-        portfolioModel = new DefaultTableModel(portfolioData, portfolioColumns) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return column == 4;
-            }
-        };
-        portfolioTable = new JTable(portfolioModel);
-        portfolioTable.setRowHeight(30);
-        portfolioTable.getColumn("Actions").setCellRenderer(new BuySellButtonRenderer());
-        portfolioTable.getColumn("Actions").setCellEditor(
-            new BuySellButtonEditor(new JCheckBox(), portfolioTable, account, this));
+        portfolioTableComponent = new PortfolioTable();
+        portfolioTable = portfolioTableComponent.getTable();
+        portfolioTableComponent.setAccount(account);
     }
 
     // EFFECTS: Initialize sidebar with buttons
@@ -441,8 +428,13 @@ public class StockAppGUI {
     private void loadAccount() {
         try {
             Account loadedAccount = jsonReader.read();
-            this.account = loadedAccount;
-            update();
+            account.removeObserver(portfolioTableComponent);
+            account.removeObserver(stockTableComponent);
+
+            account = loadedAccount;
+            account.addObserver(portfolioTableComponent);
+            account.addObserver(stockTableComponent);
+            account.notifyObservers(account, EventType.PORTFOLIO_CHANGED);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -452,8 +444,8 @@ public class StockAppGUI {
     private void showPortfolioPanel() {
         mainPanel.removeAll();
         mainPanel.add(new JLabel("Portfolio"), BorderLayout.NORTH);
-        JScrollPane tableScrollPane = new JScrollPane(portfolioTable);
-        mainPanel.add(tableScrollPane, BorderLayout.CENTER);
+        JScrollPane scrollPane = new JScrollPane(portfolioTable);
+        mainPanel.add(scrollPane, BorderLayout.CENTER);
         refreshMainPanel();
     }
 
@@ -461,60 +453,10 @@ public class StockAppGUI {
     private void showStocksPanel() {
         mainPanel.removeAll();
         mainPanel.add(new JLabel("S&P 500 Stocks"), BorderLayout.NORTH);
-        mainPanel.add(stockPanel, BorderLayout.CENTER);
-        refreshMainPanel();
-    }
-
-    // EFFECTS: Set up stock panel
-    private void setupStockPanel() {
-        stockPanel.setLayout(new BorderLayout());
         JScrollPane scrollPane = new JScrollPane(stockTable);
-        stockPanel.add(scrollPane, BorderLayout.CENTER);
-    }
-    
-
-    // EFFECTS: Retrieve all stock data from StockRepository
-    private Object[][] getAllStocksData() {
-        Map<String, Stock> stocks = StockRepository.getAllStocks();
-        // Create columns for symbol and price
-        Object[][] data = new Object[stocks.size()][3];
-        
-        // Get symbols as list and sort
-        List<String> symbols = new ArrayList<>(stocks.keySet());
-        symbols.sort(String::compareTo); 
-
-        int row = 0;
-        for (String symbol : symbols) {
-            Stock stock = stocks.get(symbol);
-            data[row][0] = stock.getSymbol();
-            data[row][1] = stock.getPrice();
-            data[row][2] = null;
-            row++; 
-        }
-        return data;
-    }
-
-    // EFFECTS: Retrieve all portfolio stock positions
-    private Object[][] getPortfolioStockData(Account account) {
-        Map<String, StockPosition> positions = account.getPortfolio().getAllStockPositions();
-        // Only create rows for positions with quantity > 0
-        List<StockPosition> activePositions = positions.values().stream()
-                .filter(position -> position.getQuantity() > 0)
-                .collect(Collectors.toList());
-        Object[][] data = new Object[activePositions.size()][5];
-
-        int row = 0;
-        for (StockPosition position : activePositions) {
-            Stock stock = position.getStock();
-            data[row][0] = stock.getSymbol();     
-            data[row][1] = stock.getPrice();
-            data[row][2] = position.getQuantity();
-            data[row][3] = position.getTotalCost();
-            data[row][4] = null;
-            row++;
-        }
-        return data;
-    }
+        mainPanel.add(scrollPane, BorderLayout.CENTER);
+        refreshMainPanel();
+    }   
 
     // EFFECTS: Refresh main panel after updating content
     private void refreshMainPanel() {
@@ -525,18 +467,18 @@ public class StockAppGUI {
     // SPECIFIES Method to update both tables after transactions
     public void update() {
         SwingUtilities.invokeLater(() -> {
-            // Update stock table
-            stockModel.setRowCount(0);
-            Object[][] newStockData = getAllStocksData();
-            for (Object[] row : newStockData) {
-                stockModel.addRow(row);
-            }
-            // Update portfolio table
-            portfolioModel.setRowCount(0);
-            Object[][] newPortfolioData = getPortfolioStockData(account);
-            for (Object[] row : newPortfolioData) {
-                portfolioModel.addRow(row);
-            }
+            // // Update stock table
+            // stockModel.setRowCount(0);
+            // Object[][] newStockData = getAllStocksData();
+            // for (Object[] row : newStockData) {
+            //     stockModel.addRow(row);
+            // }
+            // // Update portfolio table
+            // portfolioModel.setRowCount(0);
+            // Object[][] newPortfolioData = getPortfolioStockData(account);
+            // for (Object[] row : newPortfolioData) {
+            //     portfolioModel.addRow(row);
+            // }
             // Update cash balance display if it exists
             if (balanceField != null) {
                 double balance = account.getCashBalance().doubleValue(); // Assuming account has getCashBalance() method
@@ -545,19 +487,8 @@ public class StockAppGUI {
             }
             // Refresh the panels
             refreshMainPanel();
-            // Update stock and portfolio table button editors
-            updateButtonEditors();
             // Update pie chart if visible
             updatePieChart();
         });
-    }
-    
-    // EFFECTS: Update stock and portfolio table button editors
-    private void updateButtonEditors() {        
-        portfolioTable.getColumn("Actions").setCellEditor(
-            new BuySellButtonEditor(new JCheckBox(), portfolioTable, account, this));
-
-        stockTable.getColumn("Actions").setCellEditor(
-            new BuySellButtonEditor(new JCheckBox(), stockTable, account, this));
     }
 }

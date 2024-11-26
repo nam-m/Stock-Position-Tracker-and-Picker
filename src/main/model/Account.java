@@ -22,7 +22,7 @@ public class Account extends Observable implements Writable {
 
     /**
      * REQUIRES: initialDeposit > 0
-     * SPECIFIES: Construct an account with initial deposit and new portfolio
+     * EFFECTS: Construct an account with initial deposit and new portfolio
      */
     public Account(String name, double initialDeposit) {
         this.id = UUID.randomUUID().toString();
@@ -34,7 +34,7 @@ public class Account extends Observable implements Writable {
     /**
      * REQUIRES: quantity > 0
      * MODIFIES: this
-     * SPECIFIES: buy stock from portfolio, and decrease cash balance by total cost
+     * EFFECTS: buy stock from portfolio, and decrease cash balance by total cost
      */
     public void buyStock(String symbol, int quantity) {
         Stock stock = StockRepository.getStockBySymbol(symbol);
@@ -49,7 +49,7 @@ public class Account extends Observable implements Writable {
     /**
      * REQUIRES: 0 < quantity <= quantity owned for in stock position
      * MODIFIES: this
-     * SPECIFIES: sell stock from portfolio, and increase cash balance by sell value
+     * EFFECTS: sell stock from portfolio, and increase cash balance by sell value
      */
     public void sellStock(String stockSymbol, int quantity) {
         Stock stock = StockRepository.getStockBySymbol(stockSymbol);
@@ -62,7 +62,7 @@ public class Account extends Observable implements Writable {
     /**
      * REQUIRES: depositValue > 0
      * MODIFIES: this
-     * SPECIFIES: increase cash balance by depositValue
+     * EFFECTS: increase cash balance by depositValue
      */
     public void deposit(double depositValue) {
         double newBalance = this.cashBalance.doubleValue() + depositValue;
@@ -72,7 +72,7 @@ public class Account extends Observable implements Writable {
     /**
      * REQUIRES: 0 < withdrawValue <= cashBalance
      * MODIFIES: this
-     * SPECIFIES: decrease cash balance by withdrawValue
+     * EFFECTS: decrease cash balance by withdrawValue
      */
     public void withdraw(double withdrawValue) {
         double newBalance = this.cashBalance.doubleValue() - withdrawValue;
