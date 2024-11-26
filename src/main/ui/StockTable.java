@@ -1,4 +1,4 @@
-package model;
+package ui;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,10 +9,10 @@ import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
+import model.Account;
+import model.AccountEvent;
+import model.Stock;
 import observer.Observer;
-import ui.BuySellButtonEditor;
-import ui.BuySellButtonRenderer;
-import ui.StockRepository;
 
 public class StockTable implements Observer {
     private DefaultTableModel stockModel;
@@ -21,7 +21,7 @@ public class StockTable implements Observer {
     private JTable stockTable;
 
     // EFFECTS: Construct a stock table component with corresponding JTable
-    public StockTable() {
+    public StockTable(Account account) {
         stockModel = new DefaultTableModel(data, columns) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -30,7 +30,15 @@ public class StockTable implements Observer {
         };
         stockTable = new JTable(stockModel);
         stockTable.setRowHeight(30);
+        data = getAllStocksData();
+        stockModel.setRowCount(0);
+        
+        for (Object[] row : data) {
+            stockModel.addRow(row);
+        }
         stockTable.getColumn("Actions").setCellRenderer(new BuySellButtonRenderer());
+        stockTable.getColumn("Actions").setCellEditor(
+            new BuySellButtonEditor(new JCheckBox(), stockTable, account));
     }
 
     // EFFECTS: Update table data based on event
@@ -39,16 +47,6 @@ public class StockTable implements Observer {
         if (event.getType() == model.EventType.PORTFOLIO_CHANGED) {
             updateTableData(event.getAccount());
         }
-    }
-
-    // EFFECTS: Set up table data with account
-    public void setAccount(Account account) {
-        // Update table data
-        updateTableData(account);
-        
-        // Set up the button editor with the account
-        stockTable.getColumn("Actions").setCellEditor(
-            new BuySellButtonEditor(new JCheckBox(), stockTable, account));
     }
  
     // EFFECTS: Update table data with portfolio from account
@@ -70,7 +68,7 @@ public class StockTable implements Observer {
     private Object[][] getAllStocksData() {
         Map<String, Stock> stocks = StockRepository.getAllStocks();
         // Create columns for symbol and price
-        Object[][] data = new Object[stocks.size()][3];
+        data = new Object[stocks.size()][3];
         
         // Get symbols as list and sort
         List<String> symbols = new ArrayList<>(stocks.keySet());

@@ -8,16 +8,12 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -26,8 +22,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
-import javax.swing.table.DefaultTableModel;
-
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -39,10 +33,7 @@ import org.jfree.data.general.DefaultPieDataset;
 
 import model.Account;
 import model.EventType;
-import model.PortfolioTable;
-import model.Stock;
 import model.StockPosition;
-import model.StockTable;
 import persistence.JsonReader;
 import persistence.JsonWriter;
 
@@ -56,8 +47,6 @@ public class StockAppGUI {
     private final JPanel mainPanel;
     private JTable stockTable;
     private JTable portfolioTable;
-    private DefaultTableModel portfolioModel;
-    private DefaultTableModel stockModel;
     private JTextField balanceField;
 
     // private Account account;
@@ -74,8 +63,10 @@ public class StockAppGUI {
     public StockAppGUI() {
         // account = new Account("Henry", 10000);
         account = new Account("Henry", 10000);
-        initializePortfolioTable();
-        initializeStockTable();
+        portfolioTableComponent = new PortfolioTable(account);
+        portfolioTable = portfolioTableComponent.getTable();
+        stockTableComponent = new StockTable(account);
+        stockTable = stockTableComponent.getTable();
         account.addObserver(portfolioTableComponent);
         account.addObserver(stockTableComponent);
 
@@ -98,20 +89,6 @@ public class StockAppGUI {
 
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
-    }
-
-    // EFFECTS: Initialize stock table with column names, row height and buy/sell buttons under Actions column
-    private void initializeStockTable() {
-        stockTableComponent = new StockTable();
-        stockTable = stockTableComponent.getTable();
-        stockTableComponent.setAccount(account);
-    }
-
-    // EFFECTS: Initialize portfolio table with column names, row height and buy/sell buttons under Actions column
-    private void initializePortfolioTable() {
-        portfolioTableComponent = new PortfolioTable();
-        portfolioTable = portfolioTableComponent.getTable();
-        portfolioTableComponent.setAccount(account);
     }
 
     // EFFECTS: Initialize sidebar with buttons
@@ -467,18 +444,6 @@ public class StockAppGUI {
     // SPECIFIES Method to update both tables after transactions
     public void update() {
         SwingUtilities.invokeLater(() -> {
-            // // Update stock table
-            // stockModel.setRowCount(0);
-            // Object[][] newStockData = getAllStocksData();
-            // for (Object[] row : newStockData) {
-            //     stockModel.addRow(row);
-            // }
-            // // Update portfolio table
-            // portfolioModel.setRowCount(0);
-            // Object[][] newPortfolioData = getPortfolioStockData(account);
-            // for (Object[] row : newPortfolioData) {
-            //     portfolioModel.addRow(row);
-            // }
             // Update cash balance display if it exists
             if (balanceField != null) {
                 double balance = account.getCashBalance().doubleValue(); // Assuming account has getCashBalance() method

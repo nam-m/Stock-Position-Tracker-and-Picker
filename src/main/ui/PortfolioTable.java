@@ -1,4 +1,4 @@
-package model;
+package ui;
 
 import java.util.List;
 import java.util.Map;
@@ -9,9 +9,11 @@ import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
+import model.Account;
+import model.AccountEvent;
+import model.Stock;
+import model.StockPosition;
 import observer.Observer;
-import ui.BuySellButtonEditor;
-import ui.BuySellButtonRenderer;
 
 // Represents portfolio table of type Observer
 public class PortfolioTable implements Observer {
@@ -21,7 +23,7 @@ public class PortfolioTable implements Observer {
     private JTable portfolioTable;
 
     // EFFECTS: Construct a portfolio table component with corresponding JTable
-    public PortfolioTable() {
+    public PortfolioTable(Account account) {
         portfolioModel = new DefaultTableModel(data, columns) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -30,7 +32,15 @@ public class PortfolioTable implements Observer {
         };
         portfolioTable = new JTable(portfolioModel);
         portfolioTable.setRowHeight(30);
+        data = getPortfolioStockData(account);
+        portfolioModel.setRowCount(0);
+        
+        for (Object[] row : data) {
+            portfolioModel.addRow(row);
+        }       
         portfolioTable.getColumn("Actions").setCellRenderer(new BuySellButtonRenderer());
+        portfolioTable.getColumn("Actions").setCellEditor(
+            new BuySellButtonEditor(new JCheckBox(), portfolioTable, account));
     }
 
     // EFFECTS: Update table data based on event
@@ -39,16 +49,6 @@ public class PortfolioTable implements Observer {
         if (event.getType() == model.EventType.PORTFOLIO_CHANGED) {
             updateTableData(event.getAccount());
         }
-    }
-
-    // EFFECTS: Set up table data with account
-    public void setAccount(Account account) {
-        // Update table data
-        updateTableData(account);
-        
-        // Set up the button editor with the account
-        portfolioTable.getColumn("Actions").setCellEditor(
-            new BuySellButtonEditor(new JCheckBox(), portfolioTable, account));
     }
  
     // EFFECTS: Update table data with portfolio from account
@@ -76,7 +76,7 @@ public class PortfolioTable implements Observer {
         List<StockPosition> activePositions = positions.values().stream()
                 .filter(position -> position.getQuantity() > 0)
                 .collect(Collectors.toList());
-        Object[][] data = new Object[activePositions.size()][5];
+        data = new Object[activePositions.size()][5];
         int row = 0;
         for (StockPosition position : activePositions) {
             Stock stock = position.getStock();
