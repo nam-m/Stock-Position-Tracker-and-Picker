@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.json.JSONObject;
 
+import observer.Observable;
 import persistence.Writable;
 import ui.StockRepository;
 import utils.PriceUtils;
@@ -13,7 +14,7 @@ import utils.PriceUtils;
  * Represents an account with id, owner name, transactions 
  * and stock holdings & balance
 */
-public class Account implements Writable {
+public class Account extends Observable implements Writable {
     private final String id;        //account id
     private String name;            // account name
     private Portfolio portfolio;    // account portfolio
@@ -35,13 +36,14 @@ public class Account implements Writable {
      * MODIFIES: this
      * SPECIFIES: buy stock from portfolio, and decrease cash balance by total cost
      */
-    public void buyStock(String stockSymbol, int quantity) {
-        Stock stock = StockRepository.getStockBySymbol(stockSymbol);
+    public void buyStock(String symbol, int quantity) {
+        Stock stock = StockRepository.getStockBySymbol(symbol);
         double totalCost = stock.getPrice().doubleValue() * quantity;
         if (totalCost <= this.cashBalance.doubleValue()) {
             this.portfolio.buyStock(stock, quantity);
             this.cashBalance = PriceUtils.roundPrice(this.cashBalance.doubleValue() - totalCost);
         }
+        notifyObservers(this, EventType.PORTFOLIO_CHANGED);
     }
 
     /**
@@ -54,6 +56,7 @@ public class Account implements Writable {
         this.portfolio.sellStock(stock, quantity);
         double sellValue = stock.getPrice().doubleValue() * quantity;
         this.cashBalance = PriceUtils.roundPrice(this.cashBalance.doubleValue() + sellValue);
+        notifyObservers(this, EventType.PORTFOLIO_CHANGED);
     }
 
     /**
@@ -103,5 +106,4 @@ public class Account implements Writable {
         json.put("portfolio", this.getPortfolio().toJson());
         return json;
     }
-
 }
