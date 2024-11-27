@@ -44,6 +44,7 @@ public class Account extends Observable implements Writable {
             this.cashBalance = PriceUtils.roundPrice(this.cashBalance.doubleValue() - totalCost);
         }
         notifyObservers(this, EventType.PORTFOLIO_CHANGED);
+        notifyObservers(this, EventType.BALANCE_CHANGED);
     }
 
     /**
@@ -57,6 +58,7 @@ public class Account extends Observable implements Writable {
         double sellValue = stock.getPrice().doubleValue() * quantity;
         this.cashBalance = PriceUtils.roundPrice(this.cashBalance.doubleValue() + sellValue);
         notifyObservers(this, EventType.PORTFOLIO_CHANGED);
+        notifyObservers(this, EventType.BALANCE_CHANGED);
     }
 
     /**
@@ -67,6 +69,7 @@ public class Account extends Observable implements Writable {
     public void deposit(double depositValue) {
         double newBalance = this.cashBalance.doubleValue() + depositValue;
         this.cashBalance = PriceUtils.roundPrice(newBalance);
+        notifyObservers(this, EventType.BALANCE_CHANGED);
     }
 
     /**
@@ -77,6 +80,7 @@ public class Account extends Observable implements Writable {
     public void withdraw(double withdrawValue) {
         double newBalance = this.cashBalance.doubleValue() - withdrawValue;
         this.cashBalance = PriceUtils.roundPrice(newBalance);
+        notifyObservers(this, EventType.BALANCE_CHANGED);
     }
 
     public String getAccountId() {

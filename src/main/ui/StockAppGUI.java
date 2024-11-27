@@ -6,9 +6,7 @@ import java.awt.GridLayout;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.Map;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -23,19 +21,13 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
-import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
-import org.jfree.chart.JFreeChart;
-import org.jfree.chart.labels.PieSectionLabelGenerator;
-import org.jfree.chart.labels.StandardPieSectionLabelGenerator;
-import org.jfree.chart.plot.PiePlot;
-import org.jfree.data.general.DefaultPieDataset;
-
 import model.Account;
 import model.EventType;
-import model.StockPosition;
 import persistence.JsonReader;
 import persistence.JsonWriter;
+import ui.button.DepositButton;
+import ui.button.WithdrawButton;
 
 /** 
  * GUI for Stock App
@@ -57,6 +49,8 @@ public class StockAppGUI {
 
     private PortfolioTable portfolioTableComponent;
     private StockTable stockTableComponent;
+    private PieChartPanel pieChartPanel;
+    private CashBalanceField balanceFieldComponent;
     private Account account;
 
     // EFFECTS: Initialize account and create GUI application
@@ -67,8 +61,15 @@ public class StockAppGUI {
         portfolioTable = portfolioTableComponent.getTable();
         stockTableComponent = new StockTable(account);
         stockTable = stockTableComponent.getTable();
+        pieChartPanel = new PieChartPanel(account);
+        chartPanel = pieChartPanel.getPanel();
+        balanceFieldComponent = new CashBalanceField(account);
+        balanceField = balanceFieldComponent.getTextField();
+
         account.addObserver(portfolioTableComponent);
         account.addObserver(stockTableComponent);
+        account.addObserver(pieChartPanel);
+        account.addObserver(balanceFieldComponent);
 
         jsonWriter = new JsonWriter(JSON_STORE);
         jsonReader = new JsonReader(JSON_STORE);
@@ -119,7 +120,6 @@ public class StockAppGUI {
         JPanel formPanel = createFormPanel();
 
         // Create chart panel
-        chartPanel = createPieChart();
         chartPanel.setPreferredSize(new Dimension(300, 300));
 
         // Create a panel for the form and chart
@@ -172,28 +172,21 @@ public class StockAppGUI {
 
         // Balance field
         formPanel.add(new JLabel("Cash Balance: "));
-        balanceField = new JTextField(20);
-        balanceField.setEditable(false);
-        balanceField.setText(account.getCashBalance().toString());
+        // balanceField = new JTextField(20);
+        // balanceField.setEditable(false);
+        // balanceField.setText(account.getCashBalance().toString());
         formPanel.add(balanceField);
 
         return formPanel;
     }
 
-    // EFFECTS: Creates the chart panel for displaying portfolio distribution
-    // private JPanel createChartPanel() {
-    //     JPanel chartPanel = createPieChart();
-    //     chartPanel.setPreferredSize(new Dimension(300, 300));
-    //     return chartPanel;
-    // }
-
     // EFFECTS: Creates the button panel with deposit, withdraw, load, and save buttons
     private JPanel createButtonPanel() {
-        JButton depositButton = new JButton("Deposit");
-        depositButton.addActionListener(e -> handleDeposit());
+        DepositButton depositButtonComponent = new DepositButton(account);
+        JButton depositButton = depositButtonComponent.getButton();
 
-        JButton withdrawButton = new JButton("Withdraw");
-        withdrawButton.addActionListener(e -> handleWithdraw());
+        WithdrawButton withdrawButtonComponent = new WithdrawButton(account);
+        JButton withdrawButton = withdrawButtonComponent.getButton();
 
         JButton loadButton = new JButton("Load Data");
         loadButton.addActionListener(e -> handleLoadAccount());
@@ -213,134 +206,6 @@ public class StockAppGUI {
         buttonPanel.add(saveButton);
 
         return buttonPanel;
-    }
-
-    // EFFECTS: Creates and initializes the pie chart
-    private ChartPanel createPieChart() {
-        DefaultPieDataset dataset = new DefaultPieDataset();
-        updateDataset(dataset);
-        
-        JFreeChart chart = ChartFactory.createPieChart(
-                "Investment Portfolio", // chart title
-                dataset,                       // data
-                true,                         // include legend
-                true,                         // tooltips
-                false                         // URLs
-        );
-        PiePlot plot = (PiePlot) chart.getPlot();
-        PieSectionLabelGenerator labelGenerator = new StandardPieSectionLabelGenerator(
-                "{0} : {2}", new DecimalFormat("0"), new DecimalFormat("0%"));  
-        plot.setLabelGenerator(labelGenerator);
-
-        // Add spacing between sections
-        plot.setSectionOutlinesVisible(true);
-        
-        // Customize the chart appearance
-        chart.setBackgroundPaint(mainPanel.getBackground());
-        
-        return new ChartPanel(chart);
-    }
-
-    // EFFECTS: Updates the pie chart with current account data
-    private void updatePieChart() {
-        if (chartPanel != null) {
-            JFreeChart chart = chartPanel.getChart();
-            PiePlot plot = (PiePlot) chart.getPlot();
-            DefaultPieDataset dataset = (DefaultPieDataset) plot.getDataset();
-            updateDataset(dataset);
-        }
-    }
-
-    // EFFECTS: Updates the dataset with current account information
-    private void updateDataset(DefaultPieDataset dataset) {
-        dataset.clear();
-        
-        // Add data to the dataset
-        double cashBalance = account.getCashBalance().doubleValue();
-        dataset.setValue("Cash", cashBalance);
-        Map<String, StockPosition> positions = account.getPortfolio().getAllStockPositions();
-        for (String symbol : positions.keySet()) {
-            dataset.setValue(symbol, positions.get(symbol).getTotalCost());
-        }
-    }
-
-    // EFFECTS: Handles the deposit transaction
-    private void handleDeposit() {
-        String input = showTransactionDialog("Deposit", "Enter amount to deposit:");
-        if (input != null) {
-            try {
-                BigDecimal amount = new BigDecimal(input);
-                if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-                    showError("Please enter a positive amount.");
-                    return;
-                }
-                
-                account.deposit(amount.doubleValue());
-                updateBalanceDisplay();
-                updatePieChart();
-                showSuccess("Successfully deposited " + formatCurrency(amount));
-            } catch (NumberFormatException e) {
-                showError("Please enter a valid number.");
-            } catch (Exception e) {
-                showError("Error processing deposit: " + e.getMessage());
-            }
-        }
-    }
-
-    // EFFECTS: Handles the withdraw transaction
-    private void handleWithdraw() {
-        String input = showTransactionDialog("Withdraw", "Enter amount to withdraw:");
-        if (input != null) {
-            try {
-                BigDecimal amount = new BigDecimal(input);
-                if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-                    showError("Please enter a positive amount.");
-                    return;
-                }
-                
-                if (amount.compareTo(account.getCashBalance()) > 0) {
-                    showError("Insufficient funds.");
-                    return;
-                }
-                
-                account.withdraw(amount.doubleValue());
-                updateBalanceDisplay();
-                updatePieChart();
-                showSuccess("Successfully withdrew " + formatCurrency(amount));
-            } catch (NumberFormatException e) {
-                showError("Please enter a valid number.");
-            } catch (Exception e) {
-                showError("Error processing withdrawal: " + e.getMessage());
-            }
-        }
-    }
-
-    // EFFECTS: Shows a dialog for entering transaction amount
-    private String showTransactionDialog(String title, String message) {
-        JPanel panel = new JPanel();
-        panel.add(new JLabel(message));
-        JTextField textField = new JTextField(10);
-        panel.add(textField);
-
-        int result = JOptionPane.showConfirmDialog(mainPanel, panel, 
-                title, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-                
-        if (result == JOptionPane.OK_OPTION) {
-            return textField.getText().trim();
-        }
-        return null;
-    }
-
-    // EFFECTS: Shows an error message
-    private void showError(String message) {
-        JOptionPane.showMessageDialog(mainPanel, message, "Error", 
-                JOptionPane.ERROR_MESSAGE);
-    }
-
-    // EFFECTS: Shows a success message
-    private void showSuccess(String message) {
-        JOptionPane.showMessageDialog(mainPanel, message, "Success", 
-                JOptionPane.INFORMATION_MESSAGE);
     }
 
     // EFFECTS: Updates the balance display
@@ -377,13 +242,13 @@ public class StockAppGUI {
         try {
             loadAccount();  // Call your existing save method
             JOptionPane.showMessageDialog(
-                    mainPanel,
+                    null,
                     "Loaded account for " + account.getAccountName() + " from " + JSON_STORE,
                     "Load Successful",
                     JOptionPane.INFORMATION_MESSAGE);
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(
-                    mainPanel,
+                    null,
                     "Unable to load from file: " + JSON_STORE,
                     "Load Error",
                     JOptionPane.ERROR_MESSAGE);
@@ -407,11 +272,15 @@ public class StockAppGUI {
             Account loadedAccount = jsonReader.read();
             account.removeObserver(portfolioTableComponent);
             account.removeObserver(stockTableComponent);
+            account.removeObserver(pieChartPanel);
+            account.removeObserver(balanceFieldComponent);
 
             account = loadedAccount;
             account.addObserver(portfolioTableComponent);
             account.addObserver(stockTableComponent);
-            account.notifyObservers(account, EventType.PORTFOLIO_CHANGED);
+            account.addObserver(pieChartPanel);
+            account.addObserver(balanceFieldComponent);
+            account.notifyObservers(account, EventType.ACCOUNT_LOADED);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -452,8 +321,6 @@ public class StockAppGUI {
             }
             // Refresh the panels
             refreshMainPanel();
-            // Update pie chart if visible
-            updatePieChart();
         });
     }
 }
