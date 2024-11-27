@@ -45,6 +45,8 @@ public class Account extends Observable implements Writable {
         }
         notifyObservers(this, EventType.PORTFOLIO_CHANGED);
         notifyObservers(this, EventType.BALANCE_CHANGED);
+        String shareString = quantity > 1 ? "shares" : "share";
+        EventLog.getInstance().logEvent(new Event("Bought " + quantity + " " + shareString + " of " + symbol));
     }
 
     /**
@@ -52,13 +54,15 @@ public class Account extends Observable implements Writable {
      * MODIFIES: this
      * EFFECTS: sell stock from portfolio, and increase cash balance by sell value
      */
-    public void sellStock(String stockSymbol, int quantity) {
-        Stock stock = StockRepository.getStockBySymbol(stockSymbol);
+    public void sellStock(String symbol, int quantity) {
+        Stock stock = StockRepository.getStockBySymbol(symbol);
         this.portfolio.sellStock(stock, quantity);
         double sellValue = stock.getPrice().doubleValue() * quantity;
         this.cashBalance = PriceUtils.roundPrice(this.cashBalance.doubleValue() + sellValue);
         notifyObservers(this, EventType.PORTFOLIO_CHANGED);
         notifyObservers(this, EventType.BALANCE_CHANGED);
+        String shareString = quantity > 1 ? "shares" : "share";
+        EventLog.getInstance().logEvent(new Event("Sold " + quantity + " " + shareString + " of " + symbol));
     }
 
     /**
@@ -70,6 +74,7 @@ public class Account extends Observable implements Writable {
         double newBalance = this.cashBalance.doubleValue() + depositValue;
         this.cashBalance = PriceUtils.roundPrice(newBalance);
         notifyObservers(this, EventType.BALANCE_CHANGED);
+        EventLog.getInstance().logEvent(new Event("Deposited $" + depositValue));
     }
 
     /**
@@ -81,6 +86,7 @@ public class Account extends Observable implements Writable {
         double newBalance = this.cashBalance.doubleValue() - withdrawValue;
         this.cashBalance = PriceUtils.roundPrice(newBalance);
         notifyObservers(this, EventType.BALANCE_CHANGED);
+        EventLog.getInstance().logEvent(new Event("Withdrew $" + withdrawValue));
     }
 
     public String getAccountId() {

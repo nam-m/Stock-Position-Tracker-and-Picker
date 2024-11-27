@@ -3,6 +3,9 @@ package ui;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -16,6 +19,8 @@ import javax.swing.JTextField;
 
 import org.jfree.chart.ChartPanel;
 import model.Account;
+import model.Event;
+import model.EventLog;
 import ui.button.DepositButton;
 import ui.button.LoadAccountButton;
 import ui.button.SaveAccountButton;
@@ -61,10 +66,12 @@ public class StockAppGUI {
 
         frame.add(sidebarPanel, BorderLayout.WEST);
         frame.add(mainPanel, BorderLayout.CENTER);
+        // Add WindowListener to handle close event
+        frame.addWindowListener(windowClosingEvent());
         
         // Default view
         showAccountPanel();
-
+        
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
     }
@@ -195,5 +202,17 @@ public class StockAppGUI {
     private void refreshMainPanel() {
         mainPanel.revalidate();
         mainPanel.repaint();
+    }
+
+    // EFFECTS: Create a window adapter to receive window closing event
+    private WindowAdapter windowClosingEvent() {
+        return new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                for (Event event : EventLog.getInstance()) {
+                    System.out.println(event);
+                }
+            }
+        };
     }
 }
