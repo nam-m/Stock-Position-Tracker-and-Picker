@@ -1,4 +1,4 @@
-package ui;
+package ui.button;
 
 import java.awt.Component;
 import java.awt.FlowLayout;

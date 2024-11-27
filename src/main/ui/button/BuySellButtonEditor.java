@@ -1,4 +1,4 @@
-package ui;
+package ui.button;
 
 import java.awt.Component;
 import java.awt.FlowLayout;
@@ -15,6 +15,7 @@ import javax.swing.table.TableCellEditor;
 import model.Account;
 import model.Stock;
 import model.StockPosition;
+import ui.StockRepository;
 import utils.MessageHandler;
 
 /** 
