@@ -11,8 +11,11 @@ import javax.swing.table.DefaultTableModel;
 
 import model.Account;
 import model.AccountEvent;
+import model.EventType;
 import model.Stock;
 import observer.Observer;
+import ui.button.BuySellButtonEditor;
+import ui.button.BuySellButtonRenderer;
 
 public class StockTable implements Observer {
     private DefaultTableModel stockModel;
@@ -37,7 +40,8 @@ public class StockTable implements Observer {
     // EFFECTS: Update table data based on event
     @Override
     public void update(AccountEvent event) {
-        if (event.getType() == model.EventType.PORTFOLIO_CHANGED) {
+        if (event.getType() == EventType.PORTFOLIO_CHANGED
+                || event.getType() == EventType.ACCOUNT_LOADED) {
             updateTableData(event.getAccount());
         }
     }
