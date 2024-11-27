@@ -3,18 +3,12 @@ package ui;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
-
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -22,10 +16,6 @@ import javax.swing.JTextField;
 
 import org.jfree.chart.ChartPanel;
 import model.Account;
-import model.EventType;
-import observer.Observer;
-import persistence.JsonReader;
-import persistence.JsonWriter;
 import ui.button.DepositButton;
 import ui.button.LoadAccountButton;
 import ui.button.SaveAccountButton;
@@ -44,8 +34,6 @@ public class StockAppGUI {
     private JTable portfolioTable;
     private JTextField balanceField;
     private ChartPanel chartPanel;
-    private JsonWriter jsonWriter;
-    private JsonReader jsonReader;
 
     private PortfolioTable portfolioTableComponent;
     private StockTable stockTableComponent;
@@ -54,31 +42,21 @@ public class StockAppGUI {
 
     // EFFECTS: Initialize account and create GUI application
     public StockAppGUI() {
-        // account = new Account("Henry", 10000);
         account = new Account("Henry", 10000);
-        portfolioTableComponent = new PortfolioTable(account);
-        portfolioTable = portfolioTableComponent.getTable();
-        stockTableComponent = new StockTable(account);
-        stockTable = stockTableComponent.getTable();
-        pieChartPanel = new PieChartPanel(account);
-        chartPanel = pieChartPanel.getPanel();
-        balanceFieldComponent = new CashBalanceField(account);
-        balanceField = balanceFieldComponent.getTextField();
+        initializeComponents();
 
         account.addObserver(portfolioTableComponent);
         account.addObserver(stockTableComponent);
         account.addObserver(pieChartPanel);
         account.addObserver(balanceFieldComponent);
 
-        jsonWriter = new JsonWriter(JSON_STORE);
-        jsonReader = new JsonReader(JSON_STORE);
         frame = new JFrame("Stock Picker");
 
         frame.setSize(1024, 768);
         frame.setLocationRelativeTo(null);
         frame.setLayout(new BorderLayout());
 
-        sidebarPanel = initializeSidebar();
+        sidebarPanel = createSidebarPanel();
         mainPanel = new JPanel(new BorderLayout());
 
         frame.add(sidebarPanel, BorderLayout.WEST);
@@ -91,8 +69,23 @@ public class StockAppGUI {
         frame.setVisible(true);
     }
 
+    // EFFECTS: Initialize components
+    private void initializeComponents() {
+        portfolioTableComponent = new PortfolioTable(account);
+        portfolioTable = portfolioTableComponent.getTable();
+
+        stockTableComponent = new StockTable(account);
+        stockTable = stockTableComponent.getTable();
+
+        pieChartPanel = new PieChartPanel(account);
+        chartPanel = pieChartPanel.getPanel();
+
+        balanceFieldComponent = new CashBalanceField(account);
+        balanceField = balanceFieldComponent.getTextField();
+    }
+
     // EFFECTS: Initialize sidebar with buttons
-    private JPanel initializeSidebar() {
+    private JPanel createSidebarPanel() {
         JPanel sidebar = new JPanel();
         sidebar.setLayout(new GridLayout(3, 1));
         sidebar.setPreferredSize(new Dimension(100, 0));
@@ -112,51 +105,27 @@ public class StockAppGUI {
         return sidebar;
     }
 
-    // EFFECTS: Display account panel
+    // EFFECTS: Display Account panel
     private void showAccountPanel() {
         mainPanel.removeAll();
-        // Create panel for form fields
-        JPanel formPanel = createFormPanel();
 
-        // Create chart panel
-        chartPanel.setPreferredSize(new Dimension(300, 300));
-
-        // Create a panel for the form and chart
-        JPanel centerPanel = new JPanel(new BorderLayout());
-        centerPanel.add(formPanel, BorderLayout.NORTH);
-        centerPanel.add(chartPanel, BorderLayout.CENTER);
-
+        JPanel centerPanel = createCenterPanel();
         JPanel buttonPanel = createButtonPanel();
 
-        // Add panels to main panel
         mainPanel.add(centerPanel, BorderLayout.CENTER);
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
         refreshMainPanel();
     }
 
-    // EFFECTS: Display Account panel
-    // private void showAccountPanel() {
-    //     mainPanel.removeAll();
-
-    //     JPanel centerPanel = createCenterPanel();
-    //     JPanel buttonPanel = createButtonPanel();
-
-    //     mainPanel.add(centerPanel, BorderLayout.CENTER);
-    //     mainPanel.add(buttonPanel, BorderLayout.SOUTH);
-    //     refreshMainPanel();
-    // }
-
     // EFFECTS: Creates the center panel with the form and chart
-    // private JPanel createCenterPanel() {
-    //     JPanel formPanel = createFormPanel();
-    //     JPanel chartPanel = createChartPanel();
-
-    //     JPanel centerPanel = new JPanel(new BorderLayout());
-    //     centerPanel.add(formPanel, BorderLayout.NORTH);
-    //     centerPanel.add(chartPanel, BorderLayout.CENTER);
+    private JPanel createCenterPanel() {
+        JPanel formPanel = createFormPanel();
+        JPanel centerPanel = new JPanel(new BorderLayout());
+        centerPanel.add(formPanel, BorderLayout.NORTH);
+        centerPanel.add(chartPanel, BorderLayout.CENTER);
         
-    //     return centerPanel;
-    // }
+        return centerPanel;
+    }
 
     // EFFECTS: Creates the form panel for account name and balance
     private JPanel createFormPanel() {
