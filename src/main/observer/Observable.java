@@ -8,11 +8,7 @@ import model.AccountEvent;
 import model.EventType;
 
 public abstract class Observable {
-    private List<Observer> observers;
-
-    public Observable() {
-        observers = new ArrayList<>();
-    }
+    private List<Observer> observers = new ArrayList<>();
 
     public void addObserver(Observer observer) {
         observers.add(observer);
@@ -27,5 +23,9 @@ public abstract class Observable {
         for (Observer observer : observers) {
             observer.update(event);
         }
+    }
+
+    public List<Observer> getObservers() {
+        return observers;
     }
 }

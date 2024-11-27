@@ -5,8 +5,8 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.text.NumberFormat;
+import java.util.Iterator;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -19,14 +19,16 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
 
 import org.jfree.chart.ChartPanel;
 import model.Account;
 import model.EventType;
+import observer.Observer;
 import persistence.JsonReader;
 import persistence.JsonWriter;
 import ui.button.DepositButton;
+import ui.button.LoadAccountButton;
+import ui.button.SaveAccountButton;
 import ui.button.WithdrawButton;
 
 /** 
@@ -34,24 +36,21 @@ import ui.button.WithdrawButton;
 */
 public class StockAppGUI {
     private static final String JSON_STORE = "./data/account.json";
+    private Account account;
     private final JFrame frame;
     private final JPanel sidebarPanel;
     private final JPanel mainPanel;
     private JTable stockTable;
     private JTable portfolioTable;
     private JTextField balanceField;
-
-    // private Account account;
+    private ChartPanel chartPanel;
     private JsonWriter jsonWriter;
     private JsonReader jsonReader;
-
-    private ChartPanel chartPanel;
 
     private PortfolioTable portfolioTableComponent;
     private StockTable stockTableComponent;
     private PieChartPanel pieChartPanel;
     private CashBalanceField balanceFieldComponent;
-    private Account account;
 
     // EFFECTS: Initialize account and create GUI application
     public StockAppGUI() {
@@ -172,9 +171,6 @@ public class StockAppGUI {
 
         // Balance field
         formPanel.add(new JLabel("Cash Balance: "));
-        // balanceField = new JTextField(20);
-        // balanceField.setEditable(false);
-        // balanceField.setText(account.getCashBalance().toString());
         formPanel.add(balanceField);
 
         return formPanel;
@@ -188,11 +184,11 @@ public class StockAppGUI {
         WithdrawButton withdrawButtonComponent = new WithdrawButton(account);
         JButton withdrawButton = withdrawButtonComponent.getButton();
 
-        JButton loadButton = new JButton("Load Data");
-        loadButton.addActionListener(e -> handleLoadAccount());
+        LoadAccountButton loadButtonComponent = new LoadAccountButton(account, "Load Data", JSON_STORE);
+        JButton loadButton = loadButtonComponent.getButton();
 
-        JButton saveButton = new JButton("Save Data");
-        saveButton.addActionListener(e -> handleSaveAccount());
+        SaveAccountButton saveButtonComponent = new SaveAccountButton(account, "Save Data", JSON_STORE);
+        JButton saveButton = saveButtonComponent.getButton();
 
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.LINE_AXIS));
@@ -206,84 +202,6 @@ public class StockAppGUI {
         buttonPanel.add(saveButton);
 
         return buttonPanel;
-    }
-
-    // EFFECTS: Updates the balance display
-    private void updateBalanceDisplay() {
-        balanceField.setText(formatCurrency(account.getCashBalance()));
-    }
-
-    // EFFECTS: Formats currency values
-    private String formatCurrency(BigDecimal amount) {
-        NumberFormat formatter = NumberFormat.getCurrencyInstance();
-        return formatter.format(amount);
-    }
-
-    // EFFECTS: Save account and show dialogs on success/failure
-    private void handleSaveAccount() {
-        try {
-            saveAccount();  // Call your existing save method
-            JOptionPane.showMessageDialog(
-                    mainPanel,
-                    "Saved account for " + account.getAccountName() + " to " + JSON_STORE,
-                    "Save Successful",
-                    JOptionPane.INFORMATION_MESSAGE);
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(
-                    mainPanel,
-                    "Unable to write to file: " + JSON_STORE,
-                    "Save Error",
-                    JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    // EFFECTS: Load account and show dialogs on success/failure
-    private void handleLoadAccount() {
-        try {
-            loadAccount();  // Call your existing save method
-            JOptionPane.showMessageDialog(
-                    null,
-                    "Loaded account for " + account.getAccountName() + " from " + JSON_STORE,
-                    "Load Successful",
-                    JOptionPane.INFORMATION_MESSAGE);
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(
-                    null,
-                    "Unable to load from file: " + JSON_STORE,
-                    "Load Error",
-                    JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    // EFFECTS: Save account data to json
-    private void saveAccount() {
-        try {
-            jsonWriter.open();
-            jsonWriter.write(account);
-            jsonWriter.close();
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    // EFFECTS: Load account from json
-    private void loadAccount() {
-        try {
-            Account loadedAccount = jsonReader.read();
-            account.removeObserver(portfolioTableComponent);
-            account.removeObserver(stockTableComponent);
-            account.removeObserver(pieChartPanel);
-            account.removeObserver(balanceFieldComponent);
-
-            account = loadedAccount;
-            account.addObserver(portfolioTableComponent);
-            account.addObserver(stockTableComponent);
-            account.addObserver(pieChartPanel);
-            account.addObserver(balanceFieldComponent);
-            account.notifyObservers(account, EventType.ACCOUNT_LOADED);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     // EFFECTS: Display portfolio panel with a stock table
@@ -308,19 +226,5 @@ public class StockAppGUI {
     private void refreshMainPanel() {
         mainPanel.revalidate();
         mainPanel.repaint();
-    }
-
-    // SPECIFIES Method to update both tables after transactions
-    public void update() {
-        SwingUtilities.invokeLater(() -> {
-            // Update cash balance display if it exists
-            if (balanceField != null) {
-                double balance = account.getCashBalance().doubleValue(); // Assuming account has getCashBalance() method
-                String formattedBalance = String.format("$%,.2f", balance);
-                balanceField.setText(formattedBalance);
-            }
-            // Refresh the panels
-            refreshMainPanel();
-        });
     }
 }
