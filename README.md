@@ -55,3 +55,13 @@ Sold 1 share of BRK-B
 Wed Nov 27 12:43:08 PST 2024
 Withdrew $1000.0
 ```
+
+### Task 3
+#### UML Design Diagram 
+![UML Diagram](UML_Design_Diagram.jpg)
+
+#### Refactoring Possibilities
+-  `StockTable` and `PortfolioTable` to have same interface/abstract class since they have same columns containgin stock symbol and buy/sell buttons.
+- All the `Button` components can also share the same interface/abstract class to display same behavior when user selects them.
+- The Panels used to construct the GUI are currently intialized directly in the GUI, which can be done better by using separate classes for different components.
+- Also, the Observer class currently has GUI components as their concrete observers, so this can be improved by only having the specific Swing components that need to be updated so that all of the panel doesn't need to repainted.
