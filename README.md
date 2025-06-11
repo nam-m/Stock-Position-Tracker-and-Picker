@@ -36,8 +36,7 @@ This app provides me with an opportunity to explore financial data processing an
 - You can save the state of my application by selecting Save button on Account panel.
 - You can reload the state of my application by selecting Load button on Account panel.
 
-## Phase 4
-### Task 2
+## Event logs
 The event logs are stored whenever user buys & sells stocks, and deposits & withdraws cash. All logs are printed to console when the GUI window is closed.
 
 Example of event logs:
@@ -56,7 +55,6 @@ Wed Nov 27 12:43:08 PST 2024
 Withdrew $1000.0
 ```
 
-### Task 3
 #### UML Design Diagram 
 ![UML Diagram](UML_Design_Diagram.jpg)
 
